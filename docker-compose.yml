@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  discovery-service:
+    build:
+      context: ./discovery-service
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+  exchange-service:
+    build:
+      context: ./exchange-service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    depends_on:
+      - redis
+  exchange-generator-service:
+    build:
+      context: ./exchange-generator-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - exchange-service
+  redis:
+    image: redis:8.0-M04-bookworm
+    ports:
+      - "6379:6379"
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - exchange-service
+      - exchange-generator-service
+      - discovery-service
