@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Bank App - Main Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #e3f2fd, #ffffff);
+            margin: 0;
+            padding: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1976d2;
+            color: white;
+            padding: 10px 20px;
+        }
+
+        .btn-header {
+            background: white;
+            color: #1976d2;
+            border: none;
+            padding: 6px 12px;
+            margin-left: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .block {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
+
+        h2 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        button {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #125ea4;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div>Welcome to BankApp</div>
+    <div>
+        <button class="btn-header" onclick="location.href='/registration'">Регистрация</button>
+        <button class="btn-header" onclick="location.href='/logout'">Выйти</button>
+    </div>
+</header>
+
+<div class="container">
+    <div class="block">
+        <h2>Настройки аккаунта</h2>
+        <input th:value="${user.username}" type="text" id="username" th:placeholder="${user.username}" disabled>
+        <form id="passwordForm">
+            <input type="password" id="newPassword" placeholder="Новый пароль" required>
+            <button type="submit">Изменить пароль</button>
+        </form>
+        <div id="passwordMessage" style="color: green; margin-top: 10px;"></div>
+        <form id="update-form">
+            <input th:value="${user.lastName}" type="text" id="lastName" th:placeholder="${user.lastName}">
+            <input th:value="${user.firstName}" type="text" id="firstName" th:placeholder="${user.firstName}">
+            <input th:value="${user.email}" type="email" id="email" th:placeholder="${user.email}">
+            <input th:value="${user.birthDate}" type="date" id="birthDate" th:placeholder="${user.birthDate}">
+            <button type="submit">Сохранить изменения</button>
+        </form>
+        <div id="updateMessage" style="color: green; margin-top: 10px;"></div>
+        <hr>
+        <div class="block">
+            <h2>Счета</h2>
+            <form id="addAccountForm">
+                <select id="currencySelect">
+                    <option value="RUB">RUB</option>
+                    <option value="USD">USD</option>
+                    <option value="CNY">CNY</option>
+                </select>
+                <button type="submit">Добавить счёт</button>
+            </form>
+            <div id="accountsList" style="margin-top: 10px;"></div>
+        </div>
+    </div>
+
+    <script>
+        const username = document.getElementById('username').value.trim();
+
+        function loadAccounts() {
+            fetch(`/api/users/${encodeURIComponent(username)}/accounts`)
+                .then(res => res.json())
+                .then(accounts => {
+                    const container = document.getElementById('accountsList');
+                    container.innerHTML = '';
+                    if (accounts.length === 0) {
+                        container.innerHTML = '<div>Нет счетов</div>';
+                        return;
+                    }
+
+                    accounts.forEach(account => {
+                        const div = document.createElement('div');
+                        div.style.display = 'grid';
+                        div.style.gridTemplateColumns = '1fr auto 80px';
+                        div.style.alignItems = 'center';
+                        div.style.border = '1px solid #ccc';
+                        div.style.padding = '5px 10px';
+                        div.style.marginBottom = '5px';
+                        div.style.borderRadius = '4px';
+                        div.style.gap = '10px';
+
+                        div.innerHTML = `
+        <span style="font-weight: bold;">${account.currency}</span>
+        <span style="text-align: center;">${account.amount ?? 0}</span>
+        <button style="padding: 4px 8px;" onclick="deleteAccount('${account.currency}')">✖</button>
+    `;
+                        container.appendChild(div);
+                    });
+                });
+        }
+
+        function deleteAccount(currency) {
+            fetch(`/api/users/${encodeURIComponent(username)}/accounts/${encodeURIComponent(currency)}`, {
+                method: 'DELETE'
+            }).then(() => loadAccounts());
+        }
+
+        document.getElementById('addAccountForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const currency = document.getElementById('currencySelect').value;
+
+            fetch(`/api/users/${encodeURIComponent(username)}/accounts/${encodeURIComponent(currency)}`, {
+                method: 'POST',
+            }).then(() => {
+                document.getElementById('addAccountForm').reset();
+                loadAccounts();
+            });
+        });
+
+        loadAccounts();
+    </script>
+
+    <script>
+        document.getElementById('passwordForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const messageDiv = document.getElementById('passwordMessage');
+
+            if (!newPassword) {
+                messageDiv.style.color = 'red';
+                messageDiv.textContent = 'Пароль не может быть пустым';
+                return;
+            }
+
+            fetch(`/api/users/${encodeURIComponent(username)}?password=${encodeURIComponent(newPassword)}`, {
+                method: 'PATCH'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        messageDiv.style.color = 'green';
+                        messageDiv.textContent = `Пароль успешно изменен!`;
+                        document.getElementById('passwordForm').reset();
+                    } else {
+                        throw new Error('Ошибка при изменении пароля');
+                    }
+                })
+                .catch(error => {
+                    messageDiv.style.color = 'red';
+                    messageDiv.textContent = error.message;
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+
+    <script>
+        document.getElementById('update-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const username = document.getElementById('username').value.trim();
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const birthDate = document.getElementById('birthDate').value;
+            const messageDiv = document.getElementById('updateMessage');
+
+            const payload = {
+                firstName,
+                lastName,
+                email,
+                birthDate
+            };
+
+            fetch(`/api/users/${encodeURIComponent(username)}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        messageDiv.style.color = 'green';
+                        messageDiv.textContent = `Изменения сохранены!`;
+                    } else {
+                        throw new Error('Ошибка при изменении данных');
+                    }
+                })
+                .catch(error => {
+                    messageDiv.style.color = 'red';
+                    messageDiv.textContent = error.message;
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+
+    <div class="block">
+        <h2>Внести / Снять</h2>
+        <form id="transaction-form">
+            <select id="currency-select" required>
+                <option value="" disabled selected>Выберите счёт</option>
+                <option th:each="account : ${accounts}"
+                        th:value="${account.currency}"
+                        th:text="${account.currency}"></option>
+            </select>
+            <input id="amount-input" type="number" step="0.01" min="0.01" placeholder="Количество" required>
+            <button type="submit" onclick="makeTransaction('deposit')">Внести</button>
+            <button type="submit" onclick="makeTransaction('withdraw')">Снять</button>
+        </form>
+        <div id="transaction-message" style="margin-top: 10px;"></div>
+    </div>
+
+    <script>
+        function makeTransaction(operation) {
+            const currency = document.getElementById('currency-select').value;
+            const amount = document.getElementById('amount-input').value;
+            const messageDiv = document.getElementById('transaction-message');
+
+            if (!currency || !amount) {
+                messageDiv.textContent = 'Выберите счёт и укажите сумму';
+                messageDiv.style.color = 'red';
+                return;
+            }
+
+            const url = `/api/cash/${encodeURIComponent(username)}/${encodeURIComponent(currency)}/${encodeURIComponent(operation)}?amount=${encodeURIComponent(amount)}`;
+            console.log('Sending request to:', url);
+
+            document.getElementById('transaction-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                fetch(url, {
+                    method: 'POST',
+                })
+                    .then(data => {
+                        messageDiv.textContent = operation === 'deposit'
+                            ? 'Средства успешно зачислены!'
+                            : 'Средства успешно сняты!';
+                        messageDiv.style.color = 'green';
+                        document.getElementById('transaction-form').reset();
+                    })
+                    .catch(error => {
+                        messageDiv.textContent = error.message || 'Ошибка при выполнении операции';
+                        messageDiv.style.color = 'red';
+                    });
+            });
+        }
+    </script>
+
+    <div class="block">
+        <h2>Transfer Between Accounts</h2>
+        <select>
+            <option>From Account</option>
+        </select>
+        <select>
+            <option>To Account</option>
+        </select>
+        <input type="number" placeholder="Amount">
+        <button>Transfer</button>
+    </div>
+
+    <div class="block">
+        <h2>Transfer to Other Account</h2>
+        <select>
+            <option>From Account</option>
+        </select>
+        <input type="text" placeholder="Recipient Account">
+        <input type="number" placeholder="Amount">
+        <button>Send</button>
+    </div>
+
+    <div class="block">
+        <table style="width:100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding:2px;" id="exchange_rates">
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script>
+    setInterval(() => {
+        var td = document.getElementById('exchange_rates');
+        fetch('/api/rates')
+            .then(response => response.json())
+            .then(json => {
+                var table = '<table style="width:100%; border-collapse: collapse;">';
+                table += '<tr><th colspan="3">Курсы валют по отношению к рублю</th></tr>';
+                table += '<tr><td>Валюта</td><td>Курс</td></tr>';
+                table += '<tr><td>RUB</td><td>1</td></tr>';
+                json.forEach(rate => {
+                    table += '<tr>';
+                    table += '<td>' + rate.currency + '</td>';
+                    table += '<td>' + rate.rate + '</td>';
+                    table += '</tr>';
+                });
+                table += '</table>';
+                td.innerHTML = table;
+            })
+            .catch(error => td.innerHTML = 'Ошибка при получении данных курсов валют');
+    }, 1000);
+</script>
+
+</body>
+</html>

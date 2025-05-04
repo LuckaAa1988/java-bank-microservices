@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bank Registration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #003366, #004c99);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .registration-container {
+            background-color: #ffffff10;
+            padding: 2rem 3rem;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .registration-container h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            color: #f0f0f0;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            background-color: #f0f0f0;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            border: none;
+            border-radius: 8px;
+            background-color: #0077cc;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #005fa3;
+        }
+
+        .error {
+            color: #ff9999;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #d0d0d0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="registration-container">
+    <h2>Создать новый аккаунт</h2>
+    <div id="error-message" class="error"></div>
+    <form id="registration-form">
+        <div class="form-group">
+            <label>Имя</label>
+            <input type="text" id="firstName" required>
+        </div>
+        <div class="form-group">
+            <label>Фамилия</label>
+            <input type="text" id="lastName" required>
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="email" required>
+        </div>
+        <div class="form-group">
+            <label>Дата рождения</label>
+            <input type="date" id="birthDate" required>
+        </div>
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="username" required>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" required>
+        </div>
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+    <div class="footer">
+        Secure banking &copy; 2025
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('registration-form');
+    const errorMsg = document.getElementById('error-message');
+
+    function isAdult(dateString) {
+        const today = new Date();
+        const birthDate = new Date(dateString);
+        const age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        return age > 18 || (age === 18 && m >= 0);
+    }
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        errorMsg.textContent = '';
+
+        const firstName = form.firstName.value.trim();
+        const lastName = form.lastName.value.trim();
+        const email = form.email.value.trim();
+        const birthDate = form.birthDate.value;
+        const username = form.username.value.trim();
+        const password = form.password.value;
+
+        if (!firstName || !lastName || !email || !birthDate || !username || !password) {
+            errorMsg.textContent = 'Все поля обязательны!';
+            return;
+        }
+
+        if (!isAdult(birthDate)) {
+            errorMsg.textContent = 'Вы должны быть старше 18 лет!';
+            return;
+        }
+
+        const payload = {
+            firstName,
+            lastName,
+            email,
+            birthDate: birthDate,
+            username,
+            password
+        };
+
+        fetch('/api/auth/registration', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(res => {
+                if (res.ok) {
+                    window.location.href = '/';
+                } else {
+                    return res.text().then(text => {
+                        throw new Error(text || 'Ошибка!');
+                    });
+                }
+            })
+            .catch(error => {
+                errorMsg.textContent = error.message;
+            });
+    });
+</script>
+
+</body>
+</html>

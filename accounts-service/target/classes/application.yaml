@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: accounts-service
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/bank
+    username: user
+    password: 12345
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  sql:
+    init:
+      mode: always
+server:
+  port: 8083
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-service:8761/eureka

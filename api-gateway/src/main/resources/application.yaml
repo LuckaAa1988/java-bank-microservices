@@ -6,10 +6,38 @@ spring:
   cloud:
     gateway:
       routes:
+        - id: frontend-service
+          uri: lb://frontend-service
+          predicates:
+              - Path=/
         - id: exchange-service
           uri: lb://exchange-service
           predicates:
             - Path=/api/rates/**
+        - id: accounts-service
+          uri: lb://accounts-service
+          predicates:
+            - Path=/api/accounts/**
+        - id: accounts-service
+          uri: lb://accounts-service
+          predicates:
+            - Path=/api/users/**
+        - id: accounts-service
+          uri: lb://accounts-service
+          predicates:
+            - Path=/api/auth/**
+        - id: frontend-service
+          uri: lb://frontend-service
+          predicates:
+            - Path=/login
+        - id: frontend-service
+          uri: lb://frontend-service
+          predicates:
+            - Path=/registration
+        - id: cash-service
+          uri: lb://cash-service
+          predicates:
+            - Path=/api/cash/**
 eureka:
   client:
     serviceUrl:
