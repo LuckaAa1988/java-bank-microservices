@@ -4,32 +4,28 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import ru.practicum.model.dto.AccountDto;
 
-import java.math.BigDecimal;
 
 @Component
 @RequiredArgsConstructor
 public class CashClient {
 
     private final WebClient.Builder webclient;
-    public Mono<Void> deposit(String username, String currency, BigDecimal amount) {
-        return webclient.baseUrl("http://api-gateway:8080/api/users").build()
+    public Mono<Void> deposit(AccountDto accountDto) {
+        return webclient.baseUrl("http://api-gateway:8080/api/accounts").build()
                 .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/{username}/deposit/{currency}")
-                        .queryParam("amount", amount)
-                        .build(username, currency))
+                .uri("/deposit")
+                .bodyValue(accountDto)
                 .retrieve()
                 .bodyToMono(Void.class);
     }
 
-    public Mono<Void> withdraw(String username, String currency, BigDecimal amount) {
-        return webclient.baseUrl("http://api-gateway:8080/api/users").build()
+    public Mono<Void> withdraw(AccountDto accountDto) {
+        return webclient.baseUrl("http://api-gateway:8080/api/accounts").build()
                 .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/{username}/withdraw/{currency}")
-                        .queryParam("amount", amount)
-                        .build(username, currency))
+                .uri("/withdraw")
+                .bodyValue(accountDto)
                 .retrieve()
                 .bodyToMono(Void.class);
     }

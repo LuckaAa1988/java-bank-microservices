@@ -31,9 +31,9 @@ public class ViewClient {
     }
 
     public Flux<AccountResponse> getAccounts(String username) {
-        return webclient.baseUrl("http://api-gateway:8080/api/users").build()
+        return webclient.baseUrl("http://api-gateway:8080/api/accounts/users").build()
                 .get()
-                .uri("/{username}/accounts", username)
+                .uri("/{username}", username)
                 .retrieve()
                 .bodyToFlux(AccountResponse.class);
     }

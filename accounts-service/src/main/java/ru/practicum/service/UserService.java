@@ -9,7 +9,7 @@ public interface UserService {
 
     Mono<Long> changePassword(String username, String password);
 
-    Mono<Long> update(String username, UserPatchDto userPatchDto);
+    Mono<Long> update(UserPatchDto userPatchDto);
 
     Mono<UserResponse> getUser(String username);
 }

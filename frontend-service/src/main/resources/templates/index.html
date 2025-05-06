@@ -122,7 +122,7 @@
         const username = document.getElementById('username').value.trim();
 
         function loadAccounts() {
-            fetch(`/api/users/${encodeURIComponent(username)}/accounts`)
+            fetch(`/api/accounts/users/${encodeURIComponent(username)}`)
                 .then(res => res.json())
                 .then(accounts => {
                     const container = document.getElementById('accountsList');
@@ -154,20 +154,42 @@
         }
 
         function deleteAccount(currency) {
-            fetch(`/api/users/${encodeURIComponent(username)}/accounts/${encodeURIComponent(currency)}`, {
-                method: 'DELETE'
-            }).then(() => loadAccounts());
+            const payload = {
+                username,
+                currency
+            };
+
+            fetch(`/api/accounts`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                loadAccounts();
+                setTimeout(() => location.reload(), 500);
+            });
         }
 
         document.getElementById('addAccountForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const currency = document.getElementById('currencySelect').value;
 
-            fetch(`/api/users/${encodeURIComponent(username)}/accounts/${encodeURIComponent(currency)}`, {
+            const payload = {
+                username,
+                currency
+            };
+
+            fetch(`/api/accounts`, {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
             }).then(() => {
                 document.getElementById('addAccountForm').reset();
                 loadAccounts();
+                setTimeout(() => location.reload(), 500);
             });
         });
 
@@ -179,17 +201,26 @@
             e.preventDefault();
 
             const username = document.getElementById('username').value.trim();
-            const newPassword = document.getElementById('newPassword').value.trim();
+            const password = document.getElementById('newPassword').value.trim();
             const messageDiv = document.getElementById('passwordMessage');
 
-            if (!newPassword) {
+            if (!password) {
                 messageDiv.style.color = 'red';
                 messageDiv.textContent = 'Пароль не может быть пустым';
                 return;
             }
 
-            fetch(`/api/users/${encodeURIComponent(username)}?password=${encodeURIComponent(newPassword)}`, {
-                method: 'PATCH'
+            const payload = {
+                username,
+                password
+            };
+
+            fetch(`/api/users`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
             })
                 .then(response => {
                     if (response.ok) {
@@ -221,13 +252,14 @@
             const messageDiv = document.getElementById('updateMessage');
 
             const payload = {
+                username,
                 firstName,
                 lastName,
                 email,
                 birthDate
             };
 
-            fetch(`/api/users/${encodeURIComponent(username)}`, {
+            fetch(`/api/users`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -278,14 +310,23 @@
                 return;
             }
 
-            const url = `/api/cash/${encodeURIComponent(username)}/${encodeURIComponent(currency)}/${encodeURIComponent(operation)}?amount=${encodeURIComponent(amount)}`;
-            console.log('Sending request to:', url);
+            const url = `/api/cash/${encodeURIComponent(operation)}`;
+
+            const payload = {
+                username,
+                currency,
+                amount
+            };
 
             document.getElementById('transaction-form').addEventListener('submit', function (e) {
                 e.preventDefault();
 
                 fetch(url, {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
                 })
                     .then(data => {
                         messageDiv.textContent = operation === 'deposit'
@@ -293,6 +334,7 @@
                             : 'Средства успешно сняты!';
                         messageDiv.style.color = 'green';
                         document.getElementById('transaction-form').reset();
+                        setTimeout(() => location.reload(), 500);
                     })
                     .catch(error => {
                         messageDiv.textContent = error.message || 'Ошибка при выполнении операции';

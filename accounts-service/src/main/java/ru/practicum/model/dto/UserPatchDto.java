@@ -16,6 +16,9 @@ import java.time.LocalDate;
 public class UserPatchDto {
     @NotNull
     @NotBlank
+    private String username;
+    @NotNull
+    @NotBlank
     @Size(min = 2, max = 50)
     private String firstName;
     @NotNull

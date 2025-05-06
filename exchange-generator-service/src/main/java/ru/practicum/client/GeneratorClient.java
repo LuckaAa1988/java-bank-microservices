@@ -8,7 +8,7 @@ import ru.practicum.dto.RateDto;
 
 import java.util.List;
 
-@FeignClient(name = "exchange-service", url = "http://exchange-service:8082/api/rates")
+@FeignClient(name = "exchange-service", url = "http://api-gateway:8080/api/rates")
 public interface GeneratorClient {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

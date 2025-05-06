@@ -36,7 +36,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Mono<Long> update(String username, UserPatchDto userPatchDto) {
+    public Mono<Long> update(UserPatchDto userPatchDto) {
+        var username = userPatchDto.getUsername();
         var firstName = userPatchDto.getFirstName();
         var lastName = userPatchDto.getLastName();
         var email = userPatchDto.getEmail();
