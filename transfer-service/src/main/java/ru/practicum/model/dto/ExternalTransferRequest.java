@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class ExternalTransferRequest {
     @NotNull
     @NotBlank
-    private String fromUser;
+    private String username;
     @NotNull
     @NotBlank
     private String toUser;

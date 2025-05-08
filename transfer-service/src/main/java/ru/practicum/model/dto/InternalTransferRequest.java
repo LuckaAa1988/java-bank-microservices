@@ -13,6 +13,9 @@ import java.math.BigDecimal;
 public class InternalTransferRequest {
     @NotNull
     @NotBlank
+    private String username;
+    @NotNull
+    @NotBlank
     private String fromAccount;
     @NotNull
     @NotBlank

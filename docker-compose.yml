@@ -42,6 +42,26 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8085:8085"
+  transfer-service:
+    build:
+      context: ./transfer-service
+      dockerfile: Dockerfile
+    ports:
+      - "8086:8086"
+  blocker-service:
+    build:
+      context: ./blocker-service
+      dockerfile: Dockerfile
+    ports:
+      - "8087:8087"
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    ports:
+      - "8088:8088"
+    depends_on:
+      - notification-db
   redis:
     image: redis:8.0-M04-bookworm
     ports:
@@ -56,6 +76,16 @@ services:
       - POSTGRES_DB=bank
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=12345
+  notification-db:
+    image: postgres:17-alpine
+    ports:
+      - "5433:5432"
+    volumes:
+      - /var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=notification
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=12345
   api-gateway:
     build:
       context: ./api-gateway
@@ -68,6 +98,7 @@ services:
       - discovery-service
       - accounts-service
       - frontend-service
+      - transfer-service
   keycloak:
     image: quay.io/keycloak/keycloak:26.1.3
     ports:

@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-import ru.practicum.client.CashClient;
 import ru.practicum.model.dto.AccountDto;
+import ru.practicum.service.CashService;
 
 
 @RestController
@@ -14,15 +14,15 @@ import ru.practicum.model.dto.AccountDto;
 @RequiredArgsConstructor
 public class CashController {
 
-    private final CashClient cashClient;
+    private final CashService cashService;
 
     @PostMapping("/deposit")
     public Mono<ResponseEntity<Mono<Void>>> deposit(@RequestBody @Valid AccountDto accountDto) {
-        return Mono.just(ResponseEntity.ok(cashClient.deposit(accountDto)));
+        return Mono.just(ResponseEntity.ok(cashService.deposit(accountDto)));
     }
 
     @PostMapping("/withdraw")
     public Mono<ResponseEntity<Mono<Void>>> withdraw(@RequestBody @Valid AccountDto accountDto) {
-        return Mono.just(ResponseEntity.ok(cashClient.withdraw(accountDto)));
+        return Mono.just(ResponseEntity.ok(cashService.withdraw(accountDto)));
     }
 }

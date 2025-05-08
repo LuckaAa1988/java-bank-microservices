@@ -38,6 +38,18 @@ spring:
           uri: lb://cash-service
           predicates:
             - Path=/api/cash/**
+        - id: transfer-service
+          uri: lb://transfer-service
+          predicates:
+            - Path=/api/transfers/**
+        - id: blocker-service
+          uri: lb://blocker-service
+          predicates:
+            - Path=/api/blocker/**
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
 eureka:
   client:
     serviceUrl:

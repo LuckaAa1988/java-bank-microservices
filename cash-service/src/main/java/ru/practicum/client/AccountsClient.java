@@ -9,7 +9,7 @@ import ru.practicum.model.dto.AccountDto;
 
 @Component
 @RequiredArgsConstructor
-public class CashClient {
+public class AccountsClient {
 
     private final WebClient.Builder webclient;
     public Mono<Void> deposit(AccountDto accountDto) {

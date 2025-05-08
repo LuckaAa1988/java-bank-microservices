@@ -13,7 +13,7 @@ import ru.practicum.model.dto.InternalTransferRequest;
 import ru.practicum.service.TransferService;
 
 @RestController
-@RequestMapping("/api/transfer")
+@RequestMapping("/api/transfers")
 @RequiredArgsConstructor
 public class TransferController {
 

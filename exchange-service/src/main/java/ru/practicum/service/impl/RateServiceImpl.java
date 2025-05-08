@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.practicum.mapper.RateMapper;
 import ru.practicum.model.dto.RateDto;
 import ru.practicum.model.entity.Rate;
@@ -38,5 +39,12 @@ public class RateServiceImpl implements RateService {
                 .flatMap(Flux::fromIterable)
                 .map(rateMapper::toDto)
                 .filter(Objects::nonNull);
+    }
+
+    @Override
+    public Mono<RateDto> findByCurrency(String currency) {
+        return redisTemplate.opsForValue()
+                .get(PREFIX + currency)
+                .map(rateMapper::toDto);
     }
 }

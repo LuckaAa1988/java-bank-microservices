@@ -87,4 +87,30 @@ public class AccountServiceImpl implements AccountService {
                 .rowsUpdated()
                 .then();
     }
+
+    @Override
+    public Mono<Void> transfer(String fromUser,
+                               String toUser,
+                               String fromAccount,
+                               String toAccount,
+                               BigDecimal depositAmount,
+                               BigDecimal withdrawAmount) {
+        return databaseClient.inConnection(conn -> Mono.from(conn.beginTransaction())
+                .then(databaseClient.sql("UPDATE accounts SET amount = amount - :withdrawAmount WHERE user_id = " +
+                                "(SELECT id FROM users WHERE username=:fromUser) AND currency = :fromAccount")
+                        .bind("withdrawAmount", withdrawAmount)
+                        .bind("fromUser", fromUser)
+                        .bind("fromAccount", fromAccount)
+                        .fetch().rowsUpdated()
+                )
+                .then(databaseClient.sql("UPDATE accounts SET amount = amount + :depositAmount WHERE user_id = " +
+                                "(SELECT id FROM users WHERE username=:toUser) AND currency = :toAccount")
+                        .bind("depositAmount", depositAmount)
+                        .bind("toUser", toUser)
+                        .bind("toAccount", toAccount)
+                        .fetch().rowsUpdated()
+                )
+                .then(Mono.from(conn.commitTransaction()))
+        ).then();
+    }
 }

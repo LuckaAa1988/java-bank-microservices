@@ -8,6 +8,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.practicum.model.dto.AccountDto;
 import ru.practicum.model.dto.AccountResponse;
+import ru.practicum.model.dto.AccountTransferRequest;
 import ru.practicum.model.dto.UserDto;
 import ru.practicum.service.AccountService;
 
@@ -44,5 +45,13 @@ public class AccountController {
     public Mono<ResponseEntity<Mono<Void>>> withdraw(@RequestBody @Valid AccountDto accountDto) {
         return Mono.just(ResponseEntity.ok(
                 accountService.withdraw(accountDto.getUsername(), accountDto.getCurrency(), accountDto.getAmount())));
+    }
+
+    @PostMapping("/transfer")
+    public Mono<ResponseEntity<Mono<Void>>> transfer(@RequestBody @Valid AccountTransferRequest accountTransferRequest) {
+        return Mono.just(ResponseEntity.ok(
+                accountService.transfer(accountTransferRequest.getFromUser(), accountTransferRequest.getToUser(),
+                        accountTransferRequest.getFromAccount(), accountTransferRequest.getToAccount(),
+                        accountTransferRequest.getDepositAmount(), accountTransferRequest.getWithdrawAmount())));
     }
 }

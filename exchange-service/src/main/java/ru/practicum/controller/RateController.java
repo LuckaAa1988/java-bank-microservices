@@ -28,4 +28,9 @@ public class RateController {
     public Mono<ResponseEntity<Flux<RateDto>>> getRates() {
         return Mono.just(ResponseEntity.ok().body(rateService.findAll()));
     }
+
+    @GetMapping("{currency}")
+    public Mono<ResponseEntity<Mono<RateDto>>> getRate(@PathVariable String currency) {
+        return Mono.just(ResponseEntity.ok().body(rateService.findByCurrency(currency)));
+    }
 }

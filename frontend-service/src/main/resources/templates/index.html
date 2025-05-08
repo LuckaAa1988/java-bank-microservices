@@ -75,6 +75,18 @@
         button:hover {
             background-color: #125ea4;
         }
+
+        .notification-header h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .notification-header button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -275,8 +287,6 @@
                     }
                 })
                 .catch(error => {
-                    messageDiv.style.color = 'red';
-                    messageDiv.textContent = error.message;
                     console.error('Error:', error);
                 });
         });
@@ -295,20 +305,12 @@
             <button type="submit" onclick="makeTransaction('deposit')">Внести</button>
             <button type="submit" onclick="makeTransaction('withdraw')">Снять</button>
         </form>
-        <div id="transaction-message" style="margin-top: 10px;"></div>
     </div>
 
     <script>
         function makeTransaction(operation) {
             const currency = document.getElementById('currency-select').value;
             const amount = document.getElementById('amount-input').value;
-            const messageDiv = document.getElementById('transaction-message');
-
-            if (!currency || !amount) {
-                messageDiv.textContent = 'Выберите счёт и укажите сумму';
-                messageDiv.style.color = 'red';
-                return;
-            }
 
             const url = `/api/cash/${encodeURIComponent(operation)}`;
 
@@ -329,42 +331,160 @@
                     body: JSON.stringify(payload)
                 })
                     .then(data => {
-                        messageDiv.textContent = operation === 'deposit'
-                            ? 'Средства успешно зачислены!'
-                            : 'Средства успешно сняты!';
-                        messageDiv.style.color = 'green';
                         document.getElementById('transaction-form').reset();
                         setTimeout(() => location.reload(), 500);
                     })
                     .catch(error => {
-                        messageDiv.textContent = error.message || 'Ошибка при выполнении операции';
-                        messageDiv.style.color = 'red';
                     });
             });
         }
     </script>
 
     <div class="block">
-        <h2>Transfer Between Accounts</h2>
-        <select>
-            <option>From Account</option>
+        <h2>Переводы между своими счетами</h2>
+        <form id="transfer-form">
+        <select id="currency-from" required>
+            <option value="" disabled selected>Со счёта</option>
+            <option th:each="account : ${accounts}"
+                    th:value="${account.currency}"
+                    th:text="${account.currency}"></option>
         </select>
-        <select>
-            <option>To Account</option>
+        <select id="currency-to" required>
+            <option value="" disabled selected>На счёт</option>
+            <option th:each="account : ${accounts}"
+                    th:value="${account.currency}"
+                    th:text="${account.currency}"></option>
         </select>
-        <input type="number" placeholder="Amount">
-        <button>Transfer</button>
+        <input id="amount-transfer" type="number" step="0.01" min="0.01" placeholder="Количество" required>
+        <button type="submit" onclick="makeTransfer()">Перевести</button>
+        </form>
     </div>
 
     <div class="block">
-        <h2>Transfer to Other Account</h2>
-        <select>
-            <option>From Account</option>
-        </select>
-        <input type="text" placeholder="Recipient Account">
-        <input type="number" placeholder="Amount">
-        <button>Send</button>
+        <h2>Перевод между пользователями</h2>
+        <form id="user-transfer-form">
+            <select id="user-currency-from" required>
+                <option value="" disabled selected>Со счёта</option>
+                <option th:each="account : ${accounts}"
+                        th:value="${account.currency}"
+                        th:text="${account.currency}"></option>
+            </select>
+
+            <input id="to-user" type="text" placeholder="Получатель (username)" required>
+            <select id="to-account" required>
+                <option value="">Счета получателя</option>
+            </select>
+
+            <input id="amount-user-transfer" type="number" step="0.01" min="0.01" placeholder="Сумма" required>
+            <button type="submit" onclick="makeUserTransfer()">Перевести</button>
+        </form>
     </div>
+
+    <script>
+        const messageDiv = document.getElementById('user-transfer-message');
+
+        let toUserTimeout;
+        document.getElementById('to-user').addEventListener('input', function () {
+            clearTimeout(toUserTimeout);
+            const username = this.value.trim();
+
+            if (!username) return;
+
+            toUserTimeout = setTimeout(() => {
+                fetch(`/api/accounts/users/${encodeURIComponent(username)}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Пользователь не найден');
+                        return response.json();
+                    })
+                    .then(accounts => {
+                        const select = document.getElementById('to-account');
+                        select.innerHTML = '<option value="">Выберите счёт</option>';
+                        accounts.forEach(acc => {
+                            const opt = document.createElement('option');
+                            opt.value = acc.currency;
+                            opt.textContent = `${acc.currency}`;
+                            select.appendChild(opt);
+                        });
+                    })
+                    .catch(error => {
+                        document.getElementById('to-account').innerHTML = '<option value="">Ошибка загрузки счетов</option>';
+                    });
+            }, 500);
+        });
+
+        document.getElementById('user-transfer-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const fromAccount = document.getElementById('user-currency-from').value;
+            const toAccount = document.getElementById('to-account').value;
+            const amount = document.getElementById('amount-user-transfer').value;
+            const toUser = document.getElementById('to-user').value.trim();
+
+
+            const payload = {
+                username,
+                toUser,
+                fromAccount,
+                toAccount,
+                amount
+            };
+
+            fetch('/api/transfers/external', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+                .then(res => {
+                    document.getElementById('user-transfer-form').reset();
+                    setTimeout(() => location.reload(), 500);
+                })
+                .catch(error => {
+
+                });
+        });
+    </script>
+
+    <script>
+        function makeTransfer() {
+            const fromAccount = document.getElementById('currency-from').value;
+            const toAccount = document.getElementById('currency-to').value;
+            const amount = document.getElementById('amount-transfer').value;
+
+            if (!fromAccount || !amount || !toAccount) {
+                messageDiv.textContent = 'Выберите счёт и укажите сумму';
+                messageDiv.style.color = 'red';
+                return;
+            }
+
+            const url = `/api/transfers/internal`;
+
+            const payload = {
+                username,
+                fromAccount,
+                toAccount,
+                amount
+            };
+
+            document.getElementById('transfer-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                })
+                    .then(data => {
+                        document.getElementById('transfer-form').reset();
+                        setTimeout(() => location.reload(), 500);
+                    })
+                    .catch(error => {
+
+                    });
+            });
+        }
+    </script>
 
     <div class="block">
         <table style="width:100%; border-collapse: collapse;">
@@ -396,6 +516,41 @@
             })
             .catch(error => td.innerHTML = 'Ошибка при получении данных курсов валют');
     }, 1000);
+</script>
+
+<div id="notification-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 1000;"></div>
+
+<script>
+    const eventSource = new EventSource("/api/notifications/stream");
+
+    eventSource.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        showNotification(data.message, data.type);
+    };
+
+    function showNotification(message, type) {
+        const container = document.getElementById("notification-container");
+
+        const notification = document.createElement("div");
+        notification.textContent = message;
+        notification.style.padding = "10px 15px";
+        notification.style.marginTop = "10px";
+        notification.style.backgroundColor = type === 'SUCCESS' ? "#d4edda" : "#f8d7da";
+        notification.style.border = "1px solid";
+        notification.style.borderColor = type === 'SUCCESS' ? "#c3e6cb" : "#f5c6cb";
+        notification.style.color = type === 'SUCCESS' ? "#155724" : "#721c24";
+        notification.style.borderRadius = "5px";
+        notification.style.boxShadow = "0 0 10px rgba(0,0,0,0.1)";
+        notification.style.opacity = "1";
+        notification.style.transition = "opacity 0.5s";
+
+        container.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.opacity = "0";
+            setTimeout(() => container.removeChild(notification), 1000);
+        }, 5000);
+    }
 </script>
 
 </body>
