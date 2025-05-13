@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -20,6 +21,7 @@ public class SecurityConfig {
                         .anyExchange().authenticated()
                 )
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .securityContextRepository(new WebSessionServerSecurityContextRepository())
                 .oauth2Client(Customizer.withDefaults())
                 .oauth2ResourceServer(serverSpec -> serverSpec
                         .jwt(jwtSpec -> {

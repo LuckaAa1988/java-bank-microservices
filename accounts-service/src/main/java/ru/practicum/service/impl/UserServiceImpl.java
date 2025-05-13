@@ -1,6 +1,9 @@
 package ru.practicum.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,8 @@ import ru.practicum.model.dto.UserResponse;
 import ru.practicum.repository.UserRepository;
 import ru.practicum.service.UserService;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -22,10 +27,31 @@ public class UserServiceImpl implements UserService {
     private final DatabaseClient databaseClient;
     private final PasswordEncoder passwordEncoder;
     private final NotificationClient notificationClient;
+    private final Keycloak keycloak;
 
     @Override
     public Mono<Boolean> delete(String username) {
-        return userRepository.deleteByUsername(username);
+        return databaseClient.sql("SELECT a.currency, a.amount FROM accounts AS a " +
+                        "LEFT JOIN users AS u ON a.user_id = u.id WHERE u.username = :username AND a.amount != 0")
+                .bind("username", username)
+                .fetch()
+                .all()
+                .collectList()
+                .flatMap(rows -> {
+                    if (rows.isEmpty()) {
+                        return userRepository.deleteByUsername(username);
+                    } else {
+                        return Mono.empty();
+                    }
+                }).then(Mono.fromRunnable(() -> {
+                            UsersResource usersResource = keycloak.realm("Bank-app").users();
+                            List<UserRepresentation> users = usersResource.search(username);
+
+                            String userId = users.get(0).getId();
+
+                            usersResource.delete(userId);
+                        }
+                ));
     }
 
     @Override

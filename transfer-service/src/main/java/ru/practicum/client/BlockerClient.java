@@ -16,7 +16,7 @@ public class BlockerClient {
 
     public Mono<Void> checkInternalTransfer(InternalTransferRequest internalTransferRequest) {
         return webclient.post()
-                .uri("/api/blocker")
+                .uri("/blocker")
                 .bodyValue(internalTransferRequest)
                 .retrieve()
                 .bodyToMono(Void.class);
@@ -24,7 +24,7 @@ public class BlockerClient {
 
     public Mono<Void> checkExternalTransfer(ExternalTransferRequest externalTransferRequest) {
         return webclient.post()
-                .uri("/api/blocker")
+                .uri("/blocker")
                 .bodyValue(externalTransferRequest)
                 .retrieve()
                 .bodyToMono(Void.class);

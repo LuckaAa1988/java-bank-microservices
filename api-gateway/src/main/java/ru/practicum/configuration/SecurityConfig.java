@@ -9,7 +9,11 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationEntryPoint;
+import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
+import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
+
+import java.net.URI;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -28,14 +32,14 @@ public class SecurityConfig {
                                 "/keycloak/**").permitAll()
                         .anyExchange().authenticated()
                 )
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint((exchange, ex) -> {
-                            if (exchange.getRequest().getPath().toString().startsWith("/api")) {
-                                return Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED));
-                            }
-                            return new RedirectServerAuthenticationEntryPoint("/oauth2/authorization/keycloak")
-                                    .commence(exchange, ex);
-                        })
+                .securityContextRepository(new WebSessionServerSecurityContextRepository())
+                .logout(logoutSpec -> logoutSpec
+                        .logoutUrl("/logout")
+                        .logoutSuccessHandler((exchange, authentication) ->
+                                exchange.getExchange().getSession()
+                                        .flatMap(WebSession::invalidate)
+                                        .then(Mono.defer(Mono::empty))
+                        )
                 )
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .oauth2Login(withDefaults())

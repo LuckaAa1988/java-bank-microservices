@@ -101,19 +101,10 @@
 <body>
 
 <div class="login-container">
-    <form id="registration-form" th:action="@{/api/auth/login}" method="post">
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required autofocus>
-        </div>
-
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-
-        <button type="submit">Войти</button>
+    <form id="registration-form" th:action="@{/oauth2/authorization/keycloak}" method="post">
+        <button type="submit">Войти через Keycloak</button>
     </form>
+
     <div class="register-section">
         <p>Нет аккаунта?</p>
         <a th:href="@{/registration}">
@@ -124,35 +115,6 @@
         Secure banking &copy; 2025
     </div>
 </div>
-
-<script>
-    const form = document.getElementById('registration-form');
-
-    form.addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        const username = form.username.value;
-        const password = form.password.value;
-
-        fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username, password })
-        })
-            .then(res => {
-                if (res.ok) {
-                    window.location.href = '/';
-                } else {
-                    alert('Login failed');
-                }
-            })
-            .catch(() => {
-                alert('Something went wrong');
-            });
-    });
-</script>
 
 </body>
 </html>

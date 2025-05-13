@@ -21,10 +21,4 @@ public class AuthController {
         return authService.registration(userRegistrationDto)
                 .then(Mono.just(ResponseEntity.ok().build()));
     }
-
-//    @PostMapping("/login")
-//    public Mono<ResponseEntity<String>> login(@RequestBody @Valid UserLoginDto userLoginDto) {
-//        return authService.login(userLoginDto)
-//                .then(Mono.just(ResponseEntity.ok().build()));
-//    }
 }

@@ -10,11 +10,11 @@ import ru.practicum.model.dto.NotificationDto;
 @RequiredArgsConstructor
 public class NotificationClient {
 
-    private final WebClient.Builder webclient;
+    private final WebClient webclient;
 
     public Mono<Void> sendNotification(NotificationDto notificationDto) {
-        return webclient.baseUrl("http://api-gateway:8080/api/notifications").build()
-                .post()
+        return webclient.post()
+                .uri("/api/notifications")
                 .bodyValue(notificationDto)
                 .retrieve()
                 .bodyToMono(Void.class);

@@ -6,22 +6,20 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
-#  security:
-#    oauth2:
-#      client:
-#        provider:
-#          keycloak:
-#            jwk-set-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
-#            authorization-uri: http://localhost:8080/realms/Bank-app/protocol/openid-connect/auth
-#            token-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/token
-#        registration:
-#          accounts-service:
-#            provider: keycloak
-#            authorizationGrantType: client_credentials
-#            client-id: accounts-service
-#            client-secret: wXm9jO5pvKvDcIvheI6HRrVJgGuZboVS
-#            scope: openid, profile
-#            clientAuthenticationMethod: client_secret_post
+      client:
+        provider:
+          keycloak:
+            jwk-set-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
+            authorization-uri: http://localhost:8080/realms/Bank-app/protocol/openid-connect/auth
+            token-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/token
+        registration:
+          accounts-service:
+            provider: keycloak
+            authorizationGrantType: client_credentials
+            client-id: accounts-service
+            client-secret: wXm9jO5pvKvDcIvheI6HRrVJgGuZboVS
+            scope: openid, profile
+            clientAuthenticationMethod: client_secret_post
   r2dbc:
     url: r2dbc:postgresql://accounts-db:5432/bank
     username: user

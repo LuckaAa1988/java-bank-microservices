@@ -102,12 +102,15 @@
     <div class="block">
         <h2>Настройки аккаунта</h2>
         <input th:value="${user.username}" type="text" id="username" th:placeholder="${user.username}" disabled>
-        <input th:value="${jwt}" type="text" id="jwt" disabled>
+        <input th:value="${jwt}" type="hidden" id="jwt">
         <form id="passwordForm">
             <input type="password" id="newPassword" placeholder="Новый пароль" required>
             <button type="submit">Изменить пароль</button>
         </form>
         <div id="passwordMessage" style="color: green; margin-top: 10px;"></div>
+        <form id="deleteForm">
+            <button type="submit">Удалить аккаунт</button>
+        </form>
         <form id="update-form">
             <input th:value="${user.lastName}" type="text" id="lastName" th:placeholder="${user.lastName}">
             <input th:value="${user.firstName}" type="text" id="firstName" th:placeholder="${user.firstName}">
@@ -213,6 +216,38 @@
         });
 
         loadAccounts();
+    </script>
+
+    <script>
+        document.getElementById('deleteForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+
+            const payload = {
+                username
+            };
+
+            fetch(`/api/users`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        location.href='/logout';
+                    } else {
+                        throw new Error('Ошибка при удалении аккаунта');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
     </script>
 
     <script>
@@ -540,18 +575,66 @@
                 td.innerHTML = table;
             })
             .catch(error => td.innerHTML = 'Ошибка при получении данных курсов валют');
-    }, 30000);
+    }, 1000);
 </script>
 
 <div id="notification-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 1000;"></div>
 
 <script>
-    const eventSource = new EventSource("/api/notifications/stream");
+    // const eventSource = new EventSource("/api/notifications/stream");
+    //
+    // eventSource.onmessage = function (event) {
+    //     const data = JSON.parse(event.data);
+    //     showNotification(data.message, data.type);
+    // };
 
-    eventSource.onmessage = function (event) {
-        const data = JSON.parse(event.data);
-        showNotification(data.message, data.type);
-    };
+    function startSseStream() {
+        fetch("/api/notifications/stream", {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Accept": "text/event-stream"
+            }
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error("Ошибка подключения к SSE");
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            let buffer = "";
+
+            function read() {
+                reader.read().then(({ value, done }) => {
+                    if (done) return;
+
+                    buffer += decoder.decode(value, { stream: true });
+
+                    let lines = buffer.split("\n");
+                    buffer = lines.pop();
+
+                    for (let line of lines) {
+                        if (line.startsWith("data:")) {
+                            const jsonData = line.slice(5).trim();
+                            try {
+                                const data = JSON.parse(jsonData);
+                                showNotification(data.message, data.type);
+                            } catch (e) {
+                                console.error("Ошибка парсинга SSE-сообщения", e);
+                            }
+                        }
+                    }
+
+                    read();
+                });
+            }
+
+            read();
+        }).catch(err => {
+            console.error("SSE fetch ошибка:", err);
+        });
+    }
+
+    startSseStream();
 
     function showNotification(message, type) {
         const container = document.getElementById("notification-container");
