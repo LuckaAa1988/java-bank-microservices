@@ -33,6 +33,27 @@
             color: #ffffff;
         }
 
+        .register-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .register-btn:hover {
+            background-color: #3e8e41;
+        }
+
+        .register-section {
+            margin-top: 1.5rem;
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .register-section p {
+            margin-bottom: 1rem;
+            color: #666;
+        }
+
         .form-group {
             margin-bottom: 1rem;
         }
@@ -80,7 +101,6 @@
 <body>
 
 <div class="login-container">
-    <h2>Регистрация в банке</h2>
     <form id="registration-form" th:action="@{/api/auth/login}" method="post">
         <div class="form-group">
             <label for="username">Username</label>
@@ -94,6 +114,12 @@
 
         <button type="submit">Войти</button>
     </form>
+    <div class="register-section">
+        <p>Нет аккаунта?</p>
+        <a th:href="@{/registration}">
+            <button type="button" class="register-btn">Зарегистрироваться</button>
+        </a>
+    </div>
     <div class="footer">
         Secure banking &copy; 2025
     </div>

@@ -1,6 +1,11 @@
 spring:
   application:
     name: notification-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
   r2dbc:
     url: r2dbc:postgresql://notification-db:5432/notification
     username: user

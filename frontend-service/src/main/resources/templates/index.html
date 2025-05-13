@@ -102,6 +102,7 @@
     <div class="block">
         <h2>Настройки аккаунта</h2>
         <input th:value="${user.username}" type="text" id="username" th:placeholder="${user.username}" disabled>
+        <input th:value="${jwt}" type="text" id="jwt" disabled>
         <form id="passwordForm">
             <input type="password" id="newPassword" placeholder="Новый пароль" required>
             <button type="submit">Изменить пароль</button>
@@ -132,9 +133,14 @@
 
     <script>
         const username = document.getElementById('username').value.trim();
+        const token = document.getElementById('jwt').value;
 
         function loadAccounts() {
-            fetch(`/api/accounts/users/${encodeURIComponent(username)}`)
+            fetch(`/api/accounts/users/${encodeURIComponent(username)}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
                 .then(res => res.json())
                 .then(accounts => {
                     const container = document.getElementById('accountsList');
@@ -174,12 +180,12 @@
             fetch(`/api/accounts`, {
                 method: 'DELETE',
                 headers: {
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(payload)
             }).then(() => {
                 loadAccounts();
-                setTimeout(() => location.reload(), 500);
             });
         }
 
@@ -195,13 +201,14 @@
             fetch(`/api/accounts`, {
                 method: 'POST',
                 headers: {
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify(payload)
             }).then(() => {
                 document.getElementById('addAccountForm').reset();
                 loadAccounts();
-                setTimeout(() => location.reload(), 500);
             });
         });
 
@@ -230,8 +237,10 @@
             fetch(`/api/users`, {
                 method: 'PATCH',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify(payload)
             })
                 .then(response => {
@@ -274,8 +283,10 @@
             fetch(`/api/users`, {
                 method: 'PUT',
                 headers: {
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify(payload)
             })
                 .then(response => {
@@ -326,13 +337,14 @@
                 fetch(url, {
                     method: 'POST',
                     headers: {
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
+                    credentials: 'include',
                     body: JSON.stringify(payload)
                 })
                     .then(data => {
                         document.getElementById('transaction-form').reset();
-                        setTimeout(() => location.reload(), 500);
                     })
                     .catch(error => {
                     });
@@ -391,7 +403,11 @@
             if (!username) return;
 
             toUserTimeout = setTimeout(() => {
-                fetch(`/api/accounts/users/${encodeURIComponent(username)}`)
+                fetch(`/api/accounts/users/${encodeURIComponent(username)}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
                     .then(response => {
                         if (!response.ok) throw new Error('Пользователь не найден');
                         return response.json();
@@ -431,12 +447,15 @@
 
             fetch('/api/transfers/external', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
                 body: JSON.stringify(payload)
             })
                 .then(res => {
                     document.getElementById('user-transfer-form').reset();
-                    setTimeout(() => location.reload(), 500);
                 })
                 .catch(error => {
 
@@ -471,13 +490,14 @@
                 fetch(url, {
                     method: 'POST',
                     headers: {
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
+                    credentials: 'include',
                     body: JSON.stringify(payload)
                 })
                     .then(data => {
                         document.getElementById('transfer-form').reset();
-                        setTimeout(() => location.reload(), 500);
                     })
                     .catch(error => {
 
@@ -498,7 +518,12 @@
 <script>
     setInterval(() => {
         var td = document.getElementById('exchange_rates');
-        fetch('/api/rates')
+
+        fetch('/api/rates', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
             .then(response => response.json())
             .then(json => {
                 var table = '<table style="width:100%; border-collapse: collapse;">';
@@ -515,7 +540,7 @@
                 td.innerHTML = table;
             })
             .catch(error => td.innerHTML = 'Ошибка при получении данных курсов валют');
-    }, 1000);
+    }, 30000);
 </script>
 
 <div id="notification-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 1000;"></div>
@@ -552,6 +577,5 @@
         }, 5000);
     }
 </script>
-
 </body>
 </html>

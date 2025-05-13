@@ -12,19 +12,19 @@ import ru.practicum.model.dto.InternalTransferRequest;
 @RequiredArgsConstructor
 public class BlockerClient {
 
-    private final WebClient.Builder webclient;
+    private final WebClient webclient;
 
     public Mono<Void> checkInternalTransfer(InternalTransferRequest internalTransferRequest) {
-        return webclient.baseUrl("http://api-gateway:8080/api/blocker").build()
-                .post()
+        return webclient.post()
+                .uri("/api/blocker")
                 .bodyValue(internalTransferRequest)
                 .retrieve()
                 .bodyToMono(Void.class);
     }
 
     public Mono<Void> checkExternalTransfer(ExternalTransferRequest externalTransferRequest) {
-        return webclient.baseUrl("http://api-gateway:8080/api/blocker").build()
-                .post()
+        return webclient.post()
+                .uri("/api/blocker")
                 .bodyValue(externalTransferRequest)
                 .retrieve()
                 .bodyToMono(Void.class);

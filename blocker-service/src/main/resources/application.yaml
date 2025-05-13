@@ -1,6 +1,11 @@
 spring:
   application:
     name: blocker-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
 server:
   port: 8087
 eureka:

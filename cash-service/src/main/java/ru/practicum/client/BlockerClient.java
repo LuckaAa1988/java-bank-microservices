@@ -12,19 +12,19 @@ import ru.practicum.model.dto.AccountDto;
 @RequiredArgsConstructor
 public class BlockerClient {
 
-    private final WebClient.Builder webclient;
+    private final WebClient webclient;
 
     public Mono<Void> checkDeposit(AccountDto accountDto) {
-        return webclient.baseUrl("http://api-gateway:8080/api/blocker").build()
-                .post()
+        return webclient.post()
+                .uri("/blocker")
                 .bodyValue(accountDto)
                 .retrieve()
                 .bodyToMono(Void.class);
     }
 
     public Mono<Void> checkWithdraw(AccountDto accountDto) {
-        return webclient.baseUrl("http://api-gateway:8080/api/blocker").build()
-                .post()
+        return webclient.post()
+                .uri("/blocker")
                 .bodyValue(accountDto)
                 .retrieve()
                 .bodyToMono(Void.class);

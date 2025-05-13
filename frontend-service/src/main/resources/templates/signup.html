@@ -148,6 +148,11 @@
             return;
         }
 
+        if (password.length < 6) {
+            errorMsg.textContent = 'Пароль должен быть не менее 6 символов!';
+            return;
+        }
+
         if (!isAdult(birthDate)) {
             errorMsg.textContent = 'Вы должны быть старше 18 лет!';
             return;

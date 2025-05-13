@@ -10,12 +10,11 @@ import ru.practicum.model.dto.RateDto;
 @RequiredArgsConstructor
 public class ExchangeClient {
 
-    private final WebClient.Builder webclient;
+    private final WebClient webclient;
 
     public Mono<RateDto> getRate(String currency) {
-        return webclient.baseUrl("http://api-gateway:8080/api/rates").build()
-                .get()
-                .uri("/{currency}", currency)
+        return webclient.get()
+                .uri("/api/rates/{currency}", currency)
                 .retrieve()
                 .bodyToMono(RateDto.class);
     }

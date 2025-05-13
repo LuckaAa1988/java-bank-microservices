@@ -1,6 +1,10 @@
 package ru.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,19 +31,19 @@ public class ViewController {
         return "signup";
     }
 
-    @GetMapping
-    public Mono<String> indexPage(ServerWebExchange exchange,
+    @GetMapping("/index")
+    public Mono<String> indexPage(@AuthenticationPrincipal Jwt jwt,
                                   Model model) {
-        var principal = exchange.getPrincipal()
-                .map(Principal::getName).switchIfEmpty(Mono.just("Test")); //TODO
+        String username = jwt.getClaim("preferred_username");
         var rates = viewClient.getRates().collectList();
-        var user = principal.flatMap(viewClient::getUser);
-        var accounts = principal.map(viewClient::getAccounts);
+        var user = viewClient.getUser(username);
+        var accounts = viewClient.getAccounts(username).collectList();
         return Mono.zip(rates, user, accounts)
                 .doOnNext(tuple -> {
                     model.addAttribute("currencies", tuple.getT1());
                     model.addAttribute("user", tuple.getT2());
                     model.addAttribute("accounts", tuple.getT3());
+                    model.addAttribute("jwt", jwt.getTokenValue());
                 }).thenReturn("index");
     }
 }

@@ -14,16 +14,15 @@ public class WebConfig {
             ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
 
         var oauth2 = new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
-        oauth2.setDefaultClientRegistrationId("exchange-generator-service");
+        oauth2.setDefaultClientRegistrationId("frontend-service");
         return oauth2;
     }
 
     @Bean
     public WebClient webClient(ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Client) {
         return WebClient.builder()
-                .baseUrl("http://api-gateway:8090")
+                .baseUrl("http://api-gateway:8090/api")
                 .filter(oauth2Client)
                 .build();
     }
-
 }

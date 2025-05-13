@@ -1,15 +1,41 @@
 server:
-  port: 8080
+  port: 8090
 spring:
   application:
     name: api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
+      client:
+        registration:
+          keycloak:
+            client-id: api-gateway
+            client-secret: uKN4nnqF5Rd3zjd53DYSGt2MkFIQQXgV
+            scope: openid,profile,email
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          keycloak:
+            jwk-set-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
+            authorization-uri: http://localhost:8080/realms/Bank-app/protocol/openid-connect/auth
+            token-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/token
   cloud:
     gateway:
+      default-filters:
+        - TokenRelay
       routes:
+        - id: root-redirect
+          uri: lb://frontend-service
+          predicates:
+            - Path=/
+          filters:
+              - RedirectTo=302, /index
         - id: frontend-service
           uri: lb://frontend-service
           predicates:
-              - Path=/
+              - Path=/index
         - id: exchange-service
           uri: lb://exchange-service
           predicates:
@@ -18,22 +44,18 @@ spring:
           uri: lb://accounts-service
           predicates:
             - Path=/api/accounts/**
-        - id: accounts-service
+        - id: accounts-users-service
           uri: lb://accounts-service
           predicates:
             - Path=/api/users/**
-        - id: accounts-service
+        - id: accounts-api-service
           uri: lb://accounts-service
           predicates:
             - Path=/api/auth/**
-        - id: frontend-service
+        - id: frontend-auth-service
           uri: lb://frontend-service
           predicates:
-            - Path=/login
-        - id: frontend-service
-          uri: lb://frontend-service
-          predicates:
-            - Path=/registration
+            - Path=/login, /registration
         - id: cash-service
           uri: lb://cash-service
           predicates:
@@ -54,3 +76,9 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://discovery-service:8761/eureka
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.boot.autoconfigure.security: DEBUG

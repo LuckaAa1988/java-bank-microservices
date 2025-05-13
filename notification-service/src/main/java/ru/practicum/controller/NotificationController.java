@@ -3,6 +3,8 @@ package ru.practicum.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -21,10 +23,9 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<NotificationResponse> streamNotifications(ServerWebExchange exchange) {
-        return exchange.getPrincipal()
-                .map(Principal::getName).switchIfEmpty(Mono.just("Test"))
-                .flatMapMany(notificationService::getNotifications);
+    public Flux<NotificationResponse> streamNotifications(@AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaim("preferred_username");
+        return notificationService.getNotifications(username);
 
     }
 

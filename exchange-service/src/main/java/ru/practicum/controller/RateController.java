@@ -1,6 +1,7 @@
 package ru.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -22,6 +23,7 @@ public class RateController {
     public Mono<ResponseEntity<Void>> receiveRates(@RequestBody List<RateDto> rates) {
         return rateService.saveAll(rates)
                 .then(Mono.just(ResponseEntity.ok().build()));
+
     }
 
     @GetMapping

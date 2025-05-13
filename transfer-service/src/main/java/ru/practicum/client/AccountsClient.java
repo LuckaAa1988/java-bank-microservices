@@ -12,11 +12,11 @@ import ru.practicum.model.dto.InternalTransferRequest;
 @RequiredArgsConstructor
 public class AccountsClient {
 
-    private final WebClient.Builder webclient;
+    private final WebClient webclient;
 
     public Mono<Void> transfer(AccountTransferRequest accountTransferRequest) {
-        return webclient.baseUrl("http://api-gateway:8080/api/accounts/transfer").build()
-                .post()
+        return webclient.post()
+                .uri("/accounts/transfer")
                 .bodyValue(accountTransferRequest)
                 .retrieve()
                 .bodyToMono(Void.class);

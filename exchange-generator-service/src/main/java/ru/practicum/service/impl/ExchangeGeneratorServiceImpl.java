@@ -32,8 +32,6 @@ public class ExchangeGeneratorServiceImpl implements ExchangeGeneratorService {
                         .rate(BigDecimal.valueOf(0.3 + (Math.random() * 0.1))
                                 .setScale(4, RoundingMode.HALF_UP))
                         .build());
-        log.info("Курсы на данный момент: {}", rates);
-        System.out.println("Курсы на данный момент: {}");
         generatorClient.send(rates);
     }
 }
