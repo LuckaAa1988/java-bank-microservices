@@ -5,8 +5,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import ru.practicum.model.dto.AccountTransferRequest;
-import ru.practicum.model.dto.ExternalTransferRequest;
-import ru.practicum.model.dto.InternalTransferRequest;
 
 @Component
 @RequiredArgsConstructor

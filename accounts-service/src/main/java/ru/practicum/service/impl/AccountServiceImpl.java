@@ -5,9 +5,7 @@ import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.practicum.mapper.AccountMapper;
 import ru.practicum.model.dto.AccountResponse;
-import ru.practicum.repository.AccountRepository;
 import ru.practicum.service.AccountService;
 
 import java.math.BigDecimal;
