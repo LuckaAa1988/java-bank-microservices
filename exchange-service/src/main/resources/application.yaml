@@ -1,18 +1,7 @@
 spring:
   application:
     name: exchange-service
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
-  data:
-    redis:
-      host: redis
-      port: 6379
+  config:
+    import: configserver:http://config-server:8888
 server:
   port: 8082
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://discovery-service:8761/eureka

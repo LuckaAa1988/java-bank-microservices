@@ -1,19 +1,13 @@
 package ru.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import ru.practicum.client.ViewClient;
-
-import java.security.Principal;
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -21,9 +15,9 @@ public class ViewController {
 
     private final ViewClient viewClient;
 
-    @GetMapping("/login")
+    @GetMapping("/greet")
     public String loginPage() {
-        return "login";
+        return "greet";
     }
 
     @GetMapping("/registration")

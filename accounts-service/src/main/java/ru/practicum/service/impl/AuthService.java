@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -22,6 +23,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final Keycloak keycloak;
+    @Value("${keycloak.realmName}")
+    private String realmName;
 
     public Mono<User> registration(UserRegistrationDto userRegistrationDto) {
         return userRepository.findByUsername(userRegistrationDto.getUsername())
@@ -43,7 +46,7 @@ public class AuthService {
                     userRepresentation.setEmail(user.getEmail());
                     userRepresentation.setUsername(user.getUsername());
                     userRepresentation.setEnabled(true);
-                    Response response = keycloak.realm("Bank-app").users().create(userRepresentation);
+                    Response response = keycloak.realm(realmName).users().create(userRepresentation);
                     if (response.getStatus() == 201) {
                         String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
 
@@ -52,7 +55,7 @@ public class AuthService {
                         credential.setValue(userRegistrationDto.getPassword());
                         credential.setTemporary(false);
 
-                        keycloak.realm("Bank-app")
+                        keycloak.realm(realmName)
                                 .users()
                                 .get(userId)
                                 .resetPassword(credential);

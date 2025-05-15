@@ -94,7 +94,7 @@
     <div>Welcome to BankApp</div>
     <div>
         <button class="btn-header" onclick="location.href='/registration'">Регистрация</button>
-        <button class="btn-header" onclick="location.href='/logout'">Выйти</button>
+        <button class="btn-header" onclick="location.href='/keycloak-logout'">Выйти</button>
     </div>
 </header>
 
@@ -189,6 +189,8 @@
                 body: JSON.stringify(payload)
             }).then(() => {
                 loadAccounts();
+                // document.getElementById('transaction-form').reset();
+                // document.getElementById('user-currency-from').reset();
             });
         }
 
@@ -210,8 +212,10 @@
                 credentials: 'include',
                 body: JSON.stringify(payload)
             }).then(() => {
-                document.getElementById('addAccountForm').reset();
                 loadAccounts();
+                // document.getElementById('addAccountForm').reset();
+                // document.getElementById('transaction-form').reset();
+                // document.getElementById('user-currency-from').reset();
             });
         });
 
@@ -239,7 +243,7 @@
             })
                 .then(response => {
                     if (response.ok) {
-                        location.href='/logout';
+                        location.href='/';
                     } else {
                         throw new Error('Ошибка при удалении аккаунта');
                     }
@@ -380,6 +384,7 @@
                 })
                     .then(data => {
                         document.getElementById('transaction-form').reset();
+                        loadAccounts();
                     })
                     .catch(error => {
                     });
@@ -491,6 +496,7 @@
             })
                 .then(res => {
                     document.getElementById('user-transfer-form').reset();
+                    loadAccounts();
                 })
                 .catch(error => {
 
@@ -533,6 +539,7 @@
                 })
                     .then(data => {
                         document.getElementById('transfer-form').reset();
+                        loadAccounts();
                     })
                     .catch(error => {
 
@@ -581,60 +588,20 @@
 <div id="notification-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 1000;"></div>
 
 <script>
-    // const eventSource = new EventSource("/api/notifications/stream");
-    //
-    // eventSource.onmessage = function (event) {
-    //     const data = JSON.parse(event.data);
-    //     showNotification(data.message, data.type);
-    // };
-
-    function startSseStream() {
-        fetch("/api/notifications/stream", {
+    setInterval(() => {
+        fetch('/api/notifications', {
             headers: {
-                "Authorization": `Bearer ${token}`,
-                "Accept": "text/event-stream"
+                'Authorization': `Bearer ${token}`
             }
-        }).then(response => {
-            if (!response.ok) {
-                throw new Error("Ошибка подключения к SSE");
-            }
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder("utf-8");
-            let buffer = "";
-
-            function read() {
-                reader.read().then(({ value, done }) => {
-                    if (done) return;
-
-                    buffer += decoder.decode(value, { stream: true });
-
-                    let lines = buffer.split("\n");
-                    buffer = lines.pop();
-
-                    for (let line of lines) {
-                        if (line.startsWith("data:")) {
-                            const jsonData = line.slice(5).trim();
-                            try {
-                                const data = JSON.parse(jsonData);
-                                showNotification(data.message, data.type);
-                            } catch (e) {
-                                console.error("Ошибка парсинга SSE-сообщения", e);
-                            }
-                        }
-                    }
-
-                    read();
+        })
+            .then(response => response.json())
+            .then(json => {
+                json.forEach(notification => {
+                    showNotification(notification.message, notification.type);
                 });
-            }
-
-            read();
-        }).catch(err => {
-            console.error("SSE fetch ошибка:", err);
-        });
-    }
-
-    startSseStream();
+            })
+            .catch(error => console.error(error));
+    }, 6000);
 
     function showNotification(message, type) {
         const container = document.getElementById("notification-container");

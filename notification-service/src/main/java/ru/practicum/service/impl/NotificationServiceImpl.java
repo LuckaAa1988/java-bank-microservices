@@ -26,7 +26,7 @@ public class NotificationServiceImpl implements NotificationService {
         var username = notificationDto.getUsername();
         var type = notificationDto.getException() == null ? "SUCCESS" : "FAIL";
         return databaseClient.sql("INSERT INTO notifications (username, message, type, showed) " +
-                "VALUES (:username, :message, :type, :showed)")
+                        "VALUES (:username, :message, :type, :showed)")
                 .bind("username", username)
                 .bind("message", notificationDto.getData())
                 .bind("type", type)
@@ -37,7 +37,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Flux<NotificationResponse> getNotifications(String username) {
-        var notificationsFlux = databaseClient.sql(
+        return databaseClient.sql(
                         "SELECT message, type FROM notifications WHERE username = :username AND showed = 'FALSE'")
                 .bind("username", username)
                 .map((row, metadata) -> NotificationResponse.builder()
@@ -45,18 +45,12 @@ public class NotificationServiceImpl implements NotificationService {
                         .type(row.get("type", String.class))
                         .build())
                 .all()
-                .cache();
-
-        var updateMono = databaseClient.sql(
-                        "UPDATE notifications SET showed = 'TRUE' WHERE username = :username")
-                .bind("username", username)
-                .fetch()
-                .rowsUpdated();
-
-        return notificationsFlux
                 .collectList()
-                .flatMapMany(list ->
-                        updateMono.thenMany(Flux.fromIterable(list))
-                );
+                .flatMapMany(list -> databaseClient.sql(
+                                "UPDATE notifications SET showed = 'TRUE' WHERE username = :username")
+                        .bind("username", username)
+                        .fetch()
+                        .rowsUpdated()
+                        .thenMany(Flux.fromIterable(list)));
     }
 }

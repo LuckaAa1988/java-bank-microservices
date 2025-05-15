@@ -22,7 +22,7 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping
     public Flux<NotificationResponse> streamNotifications(@AuthenticationPrincipal Jwt jwt) {
         String username = jwt.getClaim("preferred_username");
         return notificationService.getNotifications(username);
