@@ -25,21 +25,21 @@ public class ViewClient {
 
     public Flux<RateDto> getRates() {
         return webclient.get()
-                .uri("/rates")
+                .uri("/api/rates")
                 .retrieve()
                 .bodyToFlux(RateDto.class);
     }
 
     public Mono<UserResponse> getUser(String username) {
         return webclient.get()
-                .uri("/users/{username}", username)
+                .uri("/api/users/{username}", username)
                 .retrieve()
                 .bodyToMono(UserResponse.class);
     }
 
     public Flux<AccountResponse> getAccounts(String username) {
         return webclient.get()
-                .uri("/accounts/users/{username}", username)
+                .uri("/api/accounts/users/{username}", username)
                 .retrieve()
                 .bodyToFlux(AccountResponse.class);
     }

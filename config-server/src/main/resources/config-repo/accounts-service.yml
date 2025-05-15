@@ -15,13 +15,13 @@ spring:
             provider: keycloak
             authorizationGrantType: client_credentials
             client-id: accounts-service
-            client-secret: wXm9jO5pvKvDcIvheI6HRrVJgGuZboVS
+            client-secret: ${ACCOUNTS_CLIENT_SECRET}
             scope: openid, profile
             clientAuthenticationMethod: client_secret_post
   r2dbc:
-    url: r2dbc:postgresql://accounts-db:5432/bank
-    username: user
-    password: 12345
+    url: ${ACCOUNTS_DB_URL}
+    username: ${ACCOUNTS_DB_USER}
+    password: ${ACCOUNTS_DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: none
@@ -36,7 +36,7 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://discovery-service:8761/eureka
+      defaultZone: ${EUREKA_URL}
 logging:
   level:
     org.springframework.security: DEBUG
@@ -44,4 +44,8 @@ logging:
     org.springframework.web: DEBUG
     org.springframework.boot.autoconfigure.security: DEBUG
 keycloak:
-  realmName: Bank-app
+  realmName: ${REALM_NAME}
+  url: ${KEYCLOAK_URL}
+  secret: ${ACCOUNTS_CLIENT_SECRET}
+gateway:
+  url: ${GATEWAY_URL}

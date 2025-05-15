@@ -14,7 +14,7 @@ public class ExchangeClient {
 
     public Mono<RateDto> getRate(String currency) {
         return webclient.get()
-                .uri("/rates/{currency}", currency)
+                .uri("/api/rates/{currency}", currency)
                 .retrieve()
                 .bodyToMono(RateDto.class);
     }

@@ -3,6 +3,7 @@ package ru.practicum.configuration;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
@@ -12,19 +13,34 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebConfig {
 
+    @Value("${spring.application.name}")
+    private String appName;
+
+    @Value("${keycloak.realmName}")
+    private String realmName;
+
+    @Value("${keycloak.url}")
+    private String keycloakUrl;
+
+    @Value("${gateway.url}")
+    private String gatewayUrl;
+
+    @Value("${keycloak.secret}")
+    private String clientSecret;
+
     @Bean
     public ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Client(
             ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
 
         var oauth2 = new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
-        oauth2.setDefaultClientRegistrationId("accounts-service");
+        oauth2.setDefaultClientRegistrationId(appName);
         return oauth2;
     }
 
     @Bean
     public WebClient webClient(ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Client) {
         return WebClient.builder()
-                .baseUrl("http://api-gateway:8090")
+                .baseUrl(gatewayUrl)
                 .filter(oauth2Client)
                 .build();
     }
@@ -32,11 +48,11 @@ public class WebConfig {
     @Bean
     public Keycloak keycloak() {
         return KeycloakBuilder.builder()
-                .serverUrl("http://keycloak:8080")
-                .realm("Bank-app")
-                .clientId("accounts-service")
+                .serverUrl(keycloakUrl)
+                .realm(realmName)
+                .clientId(appName)
                 .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
-                .clientSecret("wXm9jO5pvKvDcIvheI6HRrVJgGuZboVS")
+                .clientSecret(clientSecret)
                 .build();
     }
 

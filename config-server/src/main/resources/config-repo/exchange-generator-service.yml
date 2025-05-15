@@ -4,18 +4,20 @@ spring:
       client:
         provider:
           keycloak:
-            jwk-set-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
-            authorization-uri: http://localhost:8080/realms/Bank-app/protocol/openid-connect/auth
-            token-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/token
+            jwk-set-uri: ${JWK_SET_URI}
+            authorization-uri: ${AUTHORIZATION_URI}
+            token-uri: ${TOKEN_URI}
         registration:
           exchange-generator-service:
             provider: keycloak
             authorizationGrantType: client_credentials
             client-id: exchange-generator-service
-            client-secret: vHZgqEibJa1zPFvCKTVGtw0C4lMIWlFi
+            client-secret: ${EXCHANGE_GENERATOR_CLIENT_SECRET}
             scope: profile, openid
             clientAuthenticationMethod: client_secret_post
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://discovery-service:8761/eureka
+      defaultZone: ${EUREKA_URL}
+gateway:
+  url: ${GATEWAY_URL}

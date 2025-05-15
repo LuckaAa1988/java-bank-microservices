@@ -16,7 +16,7 @@ public class BlockerClient {
 
     public Mono<Void> checkDeposit(AccountDto accountDto) {
         return webclient.post()
-                .uri("/blocker")
+                .uri("/api/blocker")
                 .bodyValue(accountDto)
                 .retrieve()
                 .bodyToMono(Void.class);
@@ -24,7 +24,7 @@ public class BlockerClient {
 
     public Mono<Void> checkWithdraw(AccountDto accountDto) {
         return webclient.post()
-                .uri("/blocker")
+                .uri("/api/blocker")
                 .bodyValue(accountDto)
                 .retrieve()
                 .bodyToMono(Void.class);

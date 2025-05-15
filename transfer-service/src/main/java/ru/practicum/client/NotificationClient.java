@@ -14,7 +14,7 @@ public class NotificationClient {
 
     public Mono<Void> sendFailureNotification(NotificationDto notificationDto) {
         return webclient.post()
-                .uri("/notifications")
+                .uri("/api/notifications")
                 .bodyValue(notificationDto)
                 .retrieve()
                 .bodyToMono(Void.class);
@@ -22,7 +22,7 @@ public class NotificationClient {
 
     public Mono<Void> sendSuccessNotification(NotificationDto notificationDto) {
         return webclient.post()
-                .uri("/notifications")
+                .uri("/api/notifications")
                 .bodyValue(notificationDto)
                 .retrieve()
                 .bodyToMono(Void.class);

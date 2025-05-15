@@ -16,7 +16,7 @@ public class AccountsClient {
 
     public Mono<Void> transfer(AccountTransferRequest accountTransferRequest) {
         return webclient.post()
-                .uri("/accounts/transfer")
+                .uri("/api/accounts/transfer")
                 .bodyValue(accountTransferRequest)
                 .retrieve()
                 .bodyToMono(Void.class);

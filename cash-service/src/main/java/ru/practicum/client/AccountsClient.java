@@ -14,7 +14,7 @@ public class AccountsClient {
     private final WebClient webclient;
     public Mono<Void> deposit(AccountDto accountDto) {
         return webclient.post()
-                .uri("/accounts/deposit")
+                .uri("/api/accounts/deposit")
                 .bodyValue(accountDto)
                 .retrieve()
                 .bodyToMono(Void.class);
@@ -22,7 +22,7 @@ public class AccountsClient {
 
     public Mono<Void> withdraw(AccountDto accountDto) {
         return webclient.post()
-                .uri("/accounts/withdraw")
+                .uri("/api/accounts/withdraw")
                 .bodyValue(accountDto)
                 .retrieve()
                 .bodyToMono(Void.class);

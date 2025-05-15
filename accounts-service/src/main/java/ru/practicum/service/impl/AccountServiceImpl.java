@@ -16,8 +16,6 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
 
-    private final AccountRepository accountRepository;
-    private final AccountMapper accountMapper;
     private final DatabaseClient databaseClient;
 
     @Override

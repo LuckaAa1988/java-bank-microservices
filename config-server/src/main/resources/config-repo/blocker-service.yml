@@ -3,9 +3,9 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
+          jwk-set-uri: ${JWK_SET_URI}
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://discovery-service:8761/eureka
+      defaultZone: ${EUREKA_URL}
 

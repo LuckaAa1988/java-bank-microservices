@@ -3,11 +3,11 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
+          jwk-set-uri: ${JWK_SET_URI}
   r2dbc:
-    url: r2dbc:postgresql://notification-db:5432/notification
-    username: user
-    password: 12345
+    url: ${NOTIFICATION_DB_URL}
+    username: ${NOTIFICATION_DB_USER}
+    password: ${NOTIFICATION_DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: none
@@ -22,4 +22,4 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://discovery-service:8761/eureka
+      defaultZone: ${EUREKA_URL}

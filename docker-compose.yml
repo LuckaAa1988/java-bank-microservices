@@ -16,6 +16,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8082:8082"
+    environment:
+      - EUREKA_URL=${EUREKA_URL}
+      - JWK_SET_URI=${JWK_SET_URI}
+      - EXCHANGE_REDIS_HOST=${EXCHANGE_REDIS_HOST}
+      - EXCHANGE_REDIS_PORT=${EXCHANGE_REDIS_PORT}
     depends_on:
       - redis
       - config-server
@@ -26,9 +31,17 @@ services:
     ports:
       - "8083:8083"
     environment:
+      - EUREKA_URL=${EUREKA_URL}
       - JWK_SET_URI=${JWK_SET_URI}
       - AUTHORIZATION_URI=${AUTHORIZATION_URI}
       - TOKEN_URI=${TOKEN_URI}
+      - GATEWAY_URL=${GATEWAY_URL}
+      - REALM_NAME=${REALM_NAME}
+      - ACCOUNTS_CLIENT_SECRET=${ACCOUNTS_CLIENT_SECRET}
+      - ACCOUNTS_DB_URL=${ACCOUNTS_DB_URL}
+      - ACCOUNTS_DB_USER=${ACCOUNTS_DB_USER}
+      - ACCOUNTS_DB_PASSWORD=${ACCOUNTS_DB_PASSWORD}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
     depends_on:
       - accounts-db
       - config-server
@@ -38,6 +51,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8081:8081"
+    environment:
+      - EUREKA_URL=${EUREKA_URL}
+      - JWK_SET_URI=${JWK_SET_URI}
+      - AUTHORIZATION_URI=${AUTHORIZATION_URI}
+      - TOKEN_URI=${TOKEN_URI}
+      - GATEWAY_URL=${GATEWAY_URL}
+      - EXCHANGE_GENERATOR_CLIENT_SECRET=${EXCHANGE_GENERATOR_CLIENT_SECRET}
     depends_on:
       - exchange-service
       - config-server
@@ -47,6 +67,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8084:8084"
+    environment:
+      - EUREKA_URL=${EUREKA_URL}
+      - JWK_SET_URI=${JWK_SET_URI}
+      - AUTHORIZATION_URI=${AUTHORIZATION_URI}
+      - TOKEN_URI=${TOKEN_URI}
+      - GATEWAY_URL=${GATEWAY_URL}
+      - FRONTEND_CLIENT_SECRET=${FRONTEND_CLIENT_SECRET}
     depends_on:
       - config-server
   cash-service:
@@ -55,6 +82,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8085:8085"
+    environment:
+      - EUREKA_URL=${EUREKA_URL}
+      - JWK_SET_URI=${JWK_SET_URI}
+      - AUTHORIZATION_URI=${AUTHORIZATION_URI}
+      - TOKEN_URI=${TOKEN_URI}
+      - GATEWAY_URL=${GATEWAY_URL}
+      - CASH_CLIENT_SECRET=${CASH_CLIENT_SECRET}
     depends_on:
       - config-server
   transfer-service:
@@ -63,6 +97,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8086:8086"
+    environment:
+      - EUREKA_URL=${EUREKA_URL}
+      - JWK_SET_URI=${JWK_SET_URI}
+      - AUTHORIZATION_URI=${AUTHORIZATION_URI}
+      - TOKEN_URI=${TOKEN_URI}
+      - GATEWAY_URL=${GATEWAY_URL}
+      - TRANSFER_CLIENT_SECRET=${TRANSFER_CLIENT_SECRET}
     depends_on:
       - config-server
   blocker-service:
@@ -71,6 +112,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8087:8087"
+    environment:
+      - EUREKA_URL=${EUREKA_URL}
+      - JWK_SET_URI=${JWK_SET_URI}
     depends_on:
       - config-server
   notification-service:
@@ -79,6 +123,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8088:8088"
+    environment:
+      - EUREKA_URL=${EUREKA_URL}
+      - JWK_SET_URI=${JWK_SET_URI}
+      - NOTIFICATION_DB_URL=${NOTIFICATION_DB_URL}
+      - NOTIFICATION_DB_USER=${NOTIFICATION_DB_USER}
+      - NOTIFICATION_DB_PASSWORD=${NOTIFICATION_DB_PASSWORD}
     depends_on:
       - notification-db
       - config-server
@@ -93,9 +143,9 @@ services:
     volumes:
       - /var/lib/postgresql/data/
     environment:
-      - POSTGRES_DB=bank
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=${ACCOUNTS_DB_NAME}
+      - POSTGRES_USER=${ACCOUNTS_DB_USER}
+      - POSTGRES_PASSWORD=${ACCOUNTS_DB_PASSWORD}
   notification-db:
     image: postgres:17-alpine
     ports:
@@ -103,15 +153,21 @@ services:
     volumes:
       - /var/lib/postgresql/data/
     environment:
-      - POSTGRES_DB=notification
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=${NOTIFICATION_DB_NAME}
+      - POSTGRES_USER=${NOTIFICATION_DB_USER}
+      - POSTGRES_PASSWORD=${NOTIFICATION_DB_PASSWORD}
   api-gateway:
     build:
       context: ./api-gateway
       dockerfile: Dockerfile
     ports:
       - "8090:8090"
+    environment:
+      - EUREKA_URL=${EUREKA_URL}
+      - JWK_SET_URI=${JWK_SET_URI}
+      - AUTHORIZATION_URI=${AUTHORIZATION_URI}
+      - TOKEN_URI=${TOKEN_URI}
+      - GATEWAY_CLIENT_SECRET=${GATEWAY_CLIENT_SECRET}
     depends_on:
       - config-server
   keycloak:
@@ -121,10 +177,10 @@ services:
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     environment:
-      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
-      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD}
       - KC_HEALTH_ENABLED=true
-      - KC_FRONTEND_URL=http://localhost:8080
+      - KC_FRONTEND_URL=${KC_FRONTEND_URL}
       - KC_PROXY_ADDRESS_FORWARDING=true
     command: start-dev --import-realm
     healthcheck:

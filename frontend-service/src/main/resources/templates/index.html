@@ -189,8 +189,6 @@
                 body: JSON.stringify(payload)
             }).then(() => {
                 loadAccounts();
-                // document.getElementById('transaction-form').reset();
-                // document.getElementById('user-currency-from').reset();
             });
         }
 
@@ -213,9 +211,6 @@
                 body: JSON.stringify(payload)
             }).then(() => {
                 loadAccounts();
-                // document.getElementById('addAccountForm').reset();
-                // document.getElementById('transaction-form').reset();
-                // document.getElementById('user-currency-from').reset();
             });
         });
 
@@ -397,13 +392,13 @@
         <form id="transfer-form">
         <select id="currency-from" required>
             <option value="" disabled selected>Со счёта</option>
-            <option th:each="account : ${accounts}"
+            <option id="acc-from" th:each="account : ${accounts}"
                     th:value="${account.currency}"
                     th:text="${account.currency}"></option>
         </select>
         <select id="currency-to" required>
             <option value="" disabled selected>На счёт</option>
-            <option th:each="account : ${accounts}"
+            <option id="acc-to" th:each="account : ${accounts}"
                     th:value="${account.currency}"
                     th:text="${account.currency}"></option>
         </select>
