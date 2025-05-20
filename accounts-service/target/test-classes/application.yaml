@@ -1,0 +1,8 @@
+server:
+  port: 8083
+spring:
+  cloud:
+    config:
+      enabled: false
+  application:
+    name: accounts-service

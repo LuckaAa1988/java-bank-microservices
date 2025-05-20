@@ -3,11 +3,14 @@ package ru.practicum.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import ru.practicum.client.NotificationClient;
 import ru.practicum.mapper.UserMapper;
 import ru.practicum.model.dto.NotificationDto;
@@ -28,6 +31,8 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final NotificationClient notificationClient;
     private final Keycloak keycloak;
+    @Value("${keycloak.realmName}")
+    private String realmName;
 
     @Override
     public Mono<Boolean> delete(String username) {
@@ -39,19 +44,17 @@ public class UserServiceImpl implements UserService {
                 .collectList()
                 .flatMap(rows -> {
                     if (rows.isEmpty()) {
+                        UsersResource usersResource = keycloak.realm(realmName).users();
+                        List<UserRepresentation> users = usersResource.search(username);
+
+                        String userId = users.get(0).getId();
+
+                        usersResource.delete(userId);
                         return userRepository.deleteByUsername(username);
                     } else {
                         return Mono.empty();
                     }
-                }).then(Mono.fromRunnable(() -> {
-                            UsersResource usersResource = keycloak.realm("Bank-app").users();
-                            List<UserRepresentation> users = usersResource.search(username);
-
-                            String userId = users.get(0).getId();
-
-                            usersResource.delete(userId);
-                        }
-                ));
+                });
     }
 
     @Override
@@ -62,10 +65,28 @@ public class UserServiceImpl implements UserService {
                 .bind("username", username)
                 .fetch()
                 .rowsUpdated()
-                .then(notificationClient.sendNotification(NotificationDto.builder()
-                        .username(username)
-                        .data(String.format("Пароль пользователя %s успешно изменен", username))
-                        .build()));
+                .then(Mono.fromCallable(() -> keycloak.realm(realmName).users().list())
+                        .subscribeOn(Schedulers.boundedElastic())
+                        .flatMapIterable(users -> users)
+                        .filter(user -> username.equalsIgnoreCase(user.getUsername()))
+                        .next()
+                        .flatMap(user -> {
+                            CredentialRepresentation credential = new CredentialRepresentation();
+                            credential.setType(CredentialRepresentation.PASSWORD);
+                            credential.setValue(password);
+                            credential.setTemporary(false);
+
+                            return Mono.fromRunnable(() ->
+                                    keycloak.realm(realmName)
+                                            .users()
+                                            .get(user.getId())
+                                            .resetPassword(credential)
+                            ).subscribeOn(Schedulers.boundedElastic());
+                        })
+                        .then(notificationClient.sendNotification(NotificationDto.builder()
+                                .username(username)
+                                .data(String.format("Пароль пользователя %s успешно изменен", username))
+                                .build())));
     }
 
     @Override
@@ -85,10 +106,27 @@ public class UserServiceImpl implements UserService {
                 .bind("username", username)
                 .fetch()
                 .rowsUpdated()
-                .then(notificationClient.sendNotification(NotificationDto.builder()
-                        .username(username)
-                        .data(String.format("Данные пользователя %s успешно изменены", username))
-                        .build()));
+                .then(Mono.fromCallable(() -> keycloak.realm(realmName).users().list())
+                        .subscribeOn(Schedulers.boundedElastic())
+                        .flatMapIterable(users -> users)
+                        .filter(user -> username.equalsIgnoreCase(user.getUsername()))
+                        .next()
+                        .flatMap(user -> {
+                            user.setFirstName(firstName);
+                            user.setLastName(lastName);
+                            user.setEmail(email);
+
+                            return Mono.fromRunnable(() ->
+                                    keycloak.realm(realmName)
+                                            .users()
+                                            .get(user.getId())
+                                            .update(user)
+                            ).subscribeOn(Schedulers.boundedElastic());
+                        })
+                        .then(notificationClient.sendNotification(NotificationDto.builder()
+                                .username(username)
+                                .data(String.format("Данные пользователя %s успешно изменены", username))
+                                .build())));
     }
 
     @Override
