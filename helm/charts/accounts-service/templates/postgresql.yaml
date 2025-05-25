@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounts-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: accounts-db
+  template:
+    metadata:
+      labels:
+        app: accounts-db
+    spec:
+      containers:
+        - name: accounts-db
+          image: postgres:17-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "bank" # или valueFrom.secretKeyRef
+            - name: POSTGRES_USER
+              value: "user" # или valueFrom.secretKeyRef
+            - name: POSTGRES_PASSWORD
+              value: "12345"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres-data
+          emptyDir: { }
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: accounts-db
+spec:
+  type: ClusterIP
+  selector:
+    app: accounts-db
+  ports:
+    - port: 5432
+      targetPort: 5432

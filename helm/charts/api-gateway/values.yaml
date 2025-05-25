@@ -1,0 +1,18 @@
+replicaCount: 1
+
+image:
+  repository: api-gateway
+  tag: 1.0-SNAPSHOT
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8090
+
+config:
+  AUTHORIZATION_URI: http://localhost/realms/Bank-app/protocol/openid-connect/auth
+  JWK_SET_URI: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
+  TOKEN_URI: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/token
+  GATEWAY_URL: http://api-gateway:8090/
+
+secrets:
+  GATEWAY_CLIENT_SECRET: uKN4nnqF5Rd3zjd53DYSGt2MkFIQQXgV

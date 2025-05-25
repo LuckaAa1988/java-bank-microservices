@@ -1,0 +1,12 @@
+replicaCount: 1
+
+image:
+  repository: blocker-service
+  tag: 1.0-SNAPSHOT
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8087
+
+config:
+  JWK_SET_URI: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs

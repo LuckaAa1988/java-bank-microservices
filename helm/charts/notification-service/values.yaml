@@ -1,0 +1,16 @@
+replicaCount: 1
+
+image:
+  repository: notification-service
+  tag: 1.0-SNAPSHOT
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8088
+
+config:
+  JWK_SET_URI: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
+  NOTIFICATION_DB_URL: r2dbc:postgresql://notification-db:5432/notification
+  NOTIFICATION_DB_NAME: notification
+  NOTIFICATION_DB_USER: user
+  NOTIFICATION_DB_PASSWORD: "12345"

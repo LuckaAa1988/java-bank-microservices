@@ -3,5 +3,92 @@ server:
 spring:
   application:
     name: api-gateway
-  config:
-    import: configserver:http://config-server:8888
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${JWK_SET_URI}
+      client:
+        registration:
+          keycloak:
+            client-id: api-gateway
+            client-secret: ${GATEWAY_CLIENT_SECRET}
+            scope: openid,profile,email
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          keycloak:
+            jwk-set-uri: ${JWK_SET_URI}
+            authorization-uri: ${AUTHORIZATION_URI}
+            token-uri: ${TOKEN_URI}
+  cloud:
+    gateway:
+      default-filters:
+        - TokenRelay
+      routes:
+        - id: root-redirect
+          uri: http://frontend-service:8084
+          predicates:
+            - Path=/
+          filters:
+            - RedirectTo=302, /greet
+        - id: logout-redirect
+          uri: http://keycloak:8080
+          predicates:
+            - Path=/keycloak-logout
+          filters:
+            - RedirectTo=302, http://localhost/realms/Bank-app/protocol/openid-connect/logout?redirect_uri=http://localhost
+        - id: frontend-service
+          uri: http://frontend-service:8084
+          predicates:
+            - Path=/index
+        - id: keycloak-login
+          uri: http://keycloak:8080
+          predicates:
+            - Path=/oauth2/**
+        - id: keycloak-auth
+          uri: http://keycloak:8080
+          predicates:
+            - Path=/realms/**
+        - id: exchange-service
+          uri: http://exchange-service:8082
+          predicates:
+            - Path=/api/rates/**
+        - id: accounts-service
+          uri: http://accounts-service:8083
+          predicates:
+            - Path=/api/accounts/**
+        - id: accounts-users-service
+          uri: http://accounts-service:8083
+          predicates:
+            - Path=/api/users/**
+        - id: accounts-api-service
+          uri: http://accounts-service:8083
+          predicates:
+            - Path=/api/auth/**
+        - id: frontend-auth-service
+          uri: http://frontend-service:8084
+          predicates:
+            - Path=/greet, /registration
+        - id: cash-service
+          uri: http://cash-service:8085
+          predicates:
+            - Path=/api/cash/**
+        - id: transfer-service
+          uri: http://transfer-service:8086
+          predicates:
+            - Path=/api/transfers/**
+        - id: blocker-service
+          uri: http://blocker-service:8087
+          predicates:
+            - Path=/api/blocker/**
+        - id: notification-service
+          uri: http://notification-service:8088
+          predicates:
+            - Path=/api/notifications/**
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.boot.autoconfigure.security: DEBUG

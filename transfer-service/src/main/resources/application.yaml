@@ -1,7 +1,26 @@
 spring:
   application:
     name: transfer-service
-  config:
-    import: configserver:http://config-server:8888
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${JWK_SET_URI}
+      client:
+        provider:
+          keycloak:
+            jwk-set-uri: ${JWK_SET_URI}
+            authorization-uri: ${AUTHORIZATION_URI}
+            token-uri: ${TOKEN_URI}
+        registration:
+          transfer-service:
+            provider: keycloak
+            authorizationGrantType: client_credentials
+            client-id: transfer-service
+            client-secret: ${TRANSFER_CLIENT_SECRET}
+            scope: profile, openid
+            clientAuthenticationMethod: client_secret_post
+gateway:
+  url: ${GATEWAY_URL}
 server:
   port: 8086
