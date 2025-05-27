@@ -188,53 +188,90 @@ pipeline {
             }
         }
 
-        stage('Install PostgreSQL to PROD') {
-            steps {
-                sh """
-                helm upgrade --install postgres bitnami/postgresql \\
-                  --namespace prod --create-namespace \\
-                  --set auth.database=${DB_NAME} \\
-                  --set auth.username=${DB_USER} \\
-                  --set auth.password=${DB_PASSWORD}
-                """
-            }
-        }
-
-        stage('Create DB Secrets for PROD') {
-            steps {
-                sh """
-                kubectl create secret generic customer-service-customer-db \\
-                  --from-literal=password=${DB_PASSWORD} \\
-                  -n prod --dry-run=client -o yaml | kubectl apply -f -
-
-                kubectl create secret generic order-service-order-db \\
-                  --from-literal=password=${DB_PASSWORD} \\
-                  -n prod --dry-run=client -o yaml | kubectl apply -f -
-                """
-            }
-        }
-
         stage('Helm Deploy to PROD') {
             steps {
-                sh """
-                helm upgrade --install customer-service my-microservices-app/charts/customer-service \\
-                  --namespace prod --create-namespace \\
-                  --set image.repository=${DOCKER_REGISTRY}/customer-service \\
-                  --set image.tag=${IMAGE_TAG} \\
-                  --set ingress.enabled=true \\
-                  --set ingress.hosts[0].host=customer.prod.local \\
-                  --set ingress.hosts[0].paths[0].path="/" \\
-                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+                                sh """
+                                helm upgrade --install accounts-service helm/charts/accounts-service \\
+                                  --namespace prod --create-namespace \\
+                                  --set image.repository=${DOCKER_REGISTRY}/accounts-service \\
+                                  --set image.tag=${IMAGE_TAG} \\
+                                  --set ingress.enabled=true \\
+                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].paths[0].path="/" \\
+                                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
 
-                helm upgrade --install order-service my-microservices-app/charts/order-service \\
-                  --namespace prod --create-namespace \\
-                  --set image.repository=${DOCKER_REGISTRY}/order-service \\
-                  --set image.tag=${IMAGE_TAG} \\
-                  --set ingress.enabled=true \\
-                  --set ingress.hosts[0].host=order.prod.local \\
-                  --set ingress.hosts[0].paths[0].path="/" \\
-                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
-                """
+                                helm upgrade --install api-gateway helm/charts/api-gateway \\
+                                  --namespace prod --create-namespace \\
+                                  --set image.repository=${DOCKER_REGISTRY}/api-gateway \\
+                                  --set image.tag=${IMAGE_TAG} \\
+                                  --set ingress.enabled=true \\
+                                  --set ingress.hosts[0].host=order.test.local \\
+                                  --set ingress.hosts[0].paths[0].path="/" \\
+                                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+
+                                helm upgrade --install blocker-service helm/charts/blocker-service \\
+                                  --namespace prod --create-namespace \\
+                                  --set image.repository=${DOCKER_REGISTRY}/blocker-service \\
+                                  --set image.tag=${IMAGE_TAG} \\
+                                  --set ingress.enabled=true \\
+                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].paths[0].path="/" \\
+                                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+
+                                helm upgrade --install cash-service helm/charts/cash-service \\
+                                  --namespace prod --create-namespace \\
+                                  --set image.repository=${DOCKER_REGISTRY}/cash-service \\
+                                  --set image.tag=${IMAGE_TAG} \\
+                                  --set ingress.enabled=true \\
+                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].paths[0].path="/" \\
+                                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+
+                                helm upgrade --install exchange-generator-service helm/charts/exchange-generator-service \\
+                                  --namespace prod --create-namespace \\
+                                  --set image.repository=${DOCKER_REGISTRY}/exchange-generator-service \\
+                                  --set image.tag=${IMAGE_TAG} \\
+                                  --set ingress.enabled=true \\
+                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].paths[0].path="/" \\
+                                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+
+                                helm upgrade --install exchange-service helm/charts/exchange-service \\
+                                  --namespace prod --create-namespace \\
+                                  --set image.repository=${DOCKER_REGISTRY}/exchange-service \\
+                                  --set image.tag=${IMAGE_TAG} \\
+                                  --set ingress.enabled=true \\
+                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].paths[0].path="/" \\
+                                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+
+                                helm upgrade --install frontend-service helm/charts/frontend-service \\
+                                  --namespace prod --create-namespace \\
+                                  --set image.repository=${DOCKER_REGISTRY}/frontend-service \\
+                                  --set image.tag=${IMAGE_TAG} \\
+                                  --set ingress.enabled=true \\
+                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].paths[0].path="/" \\
+                                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+
+                                helm upgrade --install notification-service helm/charts/notification-service \\
+                                  --namespace prod --create-namespace \\
+                                  --set image.repository=${DOCKER_REGISTRY}/notification-service \\
+                                  --set image.tag=${IMAGE_TAG} \\
+                                  --set ingress.enabled=true \\
+                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].paths[0].path="/" \\
+                                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+
+                                helm upgrade --install transfer-service helm/charts/transfer-service \\
+                                  --namespace prod --create-namespace \\
+                                  --set image.repository=${DOCKER_REGISTRY}/transfer-service \\
+                                  --set image.tag=${IMAGE_TAG} \\
+                                  --set ingress.enabled=true \\
+                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].paths[0].path="/" \\
+                                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+                                """
             }
         }
     }
