@@ -151,7 +151,6 @@ pipeline {
                   --set ingress.hosts[0].host=customer.test.local \\
                   --set ingress.hosts[0].paths[0].path="/" \\
                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
-                """
 
                 helm upgrade --install frontend-service helm/charts/frontend-service \\
                   --namespace test --create-namespace \\
@@ -179,6 +178,7 @@ pipeline {
                   --set ingress.hosts[0].host=customer.test.local \\
                   --set ingress.hosts[0].paths[0].path="/" \\
                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+                """
             }
         }
 
