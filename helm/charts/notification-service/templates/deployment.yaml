@@ -21,3 +21,5 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "notification-service.fullname" . }}-config
+            - secretRef:
+                name: {{ include "notification-service.fullname" . }}-secret

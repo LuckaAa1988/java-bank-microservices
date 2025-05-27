@@ -7,4 +7,5 @@ data:
   NOTIFICATION_DB_URL: {{ .Values.config.NOTIFICATION_DB_URL | quote }}
   NOTIFICATION_DB_NAME: {{ .Values.config.NOTIFICATION_DB_NAME | quote }}
   NOTIFICATION_DB_USER: {{ .Values.config.NOTIFICATION_DB_USER | quote }}
-  NOTIFICATION_DB_PASSWORD: {{ .Values.config.NOTIFICATION_DB_PASSWORD | quote }}
+  POSTGRES_DB: {{ .Values.config.NOTIFICATION_DB_NAME | quote }}
+  POSTGRES_USER: {{ .Values.config.NOTIFICATION_DB_USER | quote }}

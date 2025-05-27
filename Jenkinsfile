@@ -191,14 +191,12 @@ pipeline {
         stage('Helm Deploy to PROD') {
             steps {
                                 sh """
-                                helm uninstall \$(helm list -n test --short) -n test"
-
                                 helm upgrade --install accounts-service helm/charts/accounts-service \\
                                   --namespace prod --create-namespace \\
                                   --set image.repository=${DOCKER_REGISTRY}/accounts-service \\
                                   --set image.tag=${IMAGE_TAG} \\
                                   --set ingress.enabled=true \\
-                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].host=customer.prod.local \\
                                   --set ingress.hosts[0].paths[0].path="/" \\
                                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
 
@@ -207,7 +205,7 @@ pipeline {
                                   --set image.repository=${DOCKER_REGISTRY}/api-gateway \\
                                   --set image.tag=${IMAGE_TAG} \\
                                   --set ingress.enabled=true \\
-                                  --set ingress.hosts[0].host=order.test.local \\
+                                  --set ingress.hosts[0].host=order.prod.local \\
                                   --set ingress.hosts[0].paths[0].path="/" \\
                                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
 
@@ -216,7 +214,7 @@ pipeline {
                                   --set image.repository=${DOCKER_REGISTRY}/blocker-service \\
                                   --set image.tag=${IMAGE_TAG} \\
                                   --set ingress.enabled=true \\
-                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].host=customer.prod.local \\
                                   --set ingress.hosts[0].paths[0].path="/" \\
                                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
 
@@ -225,7 +223,7 @@ pipeline {
                                   --set image.repository=${DOCKER_REGISTRY}/cash-service \\
                                   --set image.tag=${IMAGE_TAG} \\
                                   --set ingress.enabled=true \\
-                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].host=customer.prod.local \\
                                   --set ingress.hosts[0].paths[0].path="/" \\
                                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
 
@@ -234,7 +232,7 @@ pipeline {
                                   --set image.repository=${DOCKER_REGISTRY}/exchange-generator-service \\
                                   --set image.tag=${IMAGE_TAG} \\
                                   --set ingress.enabled=true \\
-                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].host=customer.prod.local \\
                                   --set ingress.hosts[0].paths[0].path="/" \\
                                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
 
@@ -243,7 +241,7 @@ pipeline {
                                   --set image.repository=${DOCKER_REGISTRY}/exchange-service \\
                                   --set image.tag=${IMAGE_TAG} \\
                                   --set ingress.enabled=true \\
-                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].host=customer.prod.local \\
                                   --set ingress.hosts[0].paths[0].path="/" \\
                                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
 
@@ -252,7 +250,7 @@ pipeline {
                                   --set image.repository=${DOCKER_REGISTRY}/frontend-service \\
                                   --set image.tag=${IMAGE_TAG} \\
                                   --set ingress.enabled=true \\
-                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].host=customer.prod.local \\
                                   --set ingress.hosts[0].paths[0].path="/" \\
                                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
 
@@ -261,7 +259,7 @@ pipeline {
                                   --set image.repository=${DOCKER_REGISTRY}/notification-service \\
                                   --set image.tag=${IMAGE_TAG} \\
                                   --set ingress.enabled=true \\
-                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].host=customer.prod.local \\
                                   --set ingress.hosts[0].paths[0].path="/" \\
                                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
 
@@ -270,7 +268,7 @@ pipeline {
                                   --set image.repository=${DOCKER_REGISTRY}/transfer-service \\
                                   --set image.tag=${IMAGE_TAG} \\
                                   --set ingress.enabled=true \\
-                                  --set ingress.hosts[0].host=customer.test.local \\
+                                  --set ingress.hosts[0].host=customer.prod.local \\
                                   --set ingress.hosts[0].paths[0].path="/" \\
                                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
                                 """

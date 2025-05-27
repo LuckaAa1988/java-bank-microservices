@@ -1,29 +1,28 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: accounts-db
+  name: {{ .Values.postgresql.name }}
 spec:
-  replicas: 1
+  serviceName: {{ .Values.postgresql.name }}
+  replicas: {{ .Values.postgresql.replicaCount }}
   selector:
     matchLabels:
-      app: accounts-db
+      app: {{ .Values.postgresql.name }}
   template:
     metadata:
       labels:
-        app: accounts-db
+        app: {{ .Values.postgresql.name }}
     spec:
       containers:
-        - name: accounts-db
-          image: postgres:17-alpine
+        - name: {{ .Values.postgresql.name }}
+          image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
           ports:
-            - containerPort: 5432
-          env:
-            - name: POSTGRES_DB
-              value: "bank" # или valueFrom.secretKeyRef
-            - name: POSTGRES_USER
-              value: "user" # или valueFrom.secretKeyRef
-            - name: POSTGRES_PASSWORD
-              value: "12345"
+            - containerPort: {{ .Values.postgresql.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "accounts-service.fullname" . }}-config
+            - secretRef:
+                name: {{ include "accounts-service.fullname" . }}-secret
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
@@ -35,11 +34,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: accounts-db
+  name: {{ .Values.postgresql.name }}
 spec:
   type: ClusterIP
   selector:
-    app: accounts-db
+    app: {{ .Values.postgresql.name }}
   ports:
-    - port: 5432
-      targetPort: 5432
+    - port: {{ .Values.postgresql.port }}
+      targetPort: {{ .Values.postgresql.port }}

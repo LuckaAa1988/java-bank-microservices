@@ -12,3 +12,5 @@ data:
   ACCOUNTS_DB_NAME: {{ .Values.config.ACCOUNTS_DB_NAME | quote }}
   ACCOUNTS_DB_USER: {{ .Values.config.ACCOUNTS_DB_USER | quote }}
   GATEWAY_URL: {{ .Values.config.GATEWAY_URL | quote }}
+  POSTGRES_DB: {{ .Values.config.ACCOUNTS_DB_NAME | quote }}
+  POSTGRES_USER: {{ .Values.config.ACCOUNTS_DB_USER | quote }}
