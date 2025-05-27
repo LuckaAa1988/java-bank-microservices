@@ -190,27 +190,18 @@ pipeline {
 
         stage('Delete Test helm deploy') {
             steps {
-                                sh """
-                                helm uninstall accounts-service -n test"
-
-                                helm uninstall api-gateway -n test"
-
-                                helm uninstall blocker-service -n test"
-
-                                helm uninstall cash-service -n test"
-
-                                helm uninstall exchange-generator-service -n test"
-
-                                helm uninstall exchange-service -n test"
-
-                                helm uninstall frontend-service -n test"
-
-                                helm uninstall notification-service -n test"
-
-                                helm uninstall transfer-service -n test"
-                                """
+                sh """
+                    helm uninstall accounts-service -n test || true
+                    helm uninstall api-gateway -n test || true
+                    helm uninstall blocker-service -n test || true
+                    helm uninstall cash-service -n test || true
+                    helm uninstall exchange-generator-service -n test || true
+                    helm uninstall exchange-service -n test || true
+                    helm uninstall frontend-service -n test || true
+                    helm uninstall notification-service -n test || true
+                    helm uninstall transfer-service -n test || true
+                    """
             }
-
         }
 
         stage('Helm Deploy to PROD') {
