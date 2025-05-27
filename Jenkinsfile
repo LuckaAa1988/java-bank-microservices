@@ -84,47 +84,13 @@ pipeline {
                 sh """
                 docker build -t ${DOCKER_REGISTRY}/accounts-service:${IMAGE_TAG} accounts-service
                 docker build -t ${DOCKER_REGISTRY}/api-gateway:${IMAGE_TAG} api-gateway
-                """
-            }
-        }
-
-        stage('Push Docker Images') {
-            steps {
-                withCredentials([string(credentialsId: 'GHCR_TOKEN', variable: 'GHCR_TOKEN')]) {
-                    sh """
-                    echo \$GHCR_TOKEN | docker login ghcr.io -u ${GITHUB_USERNAME} --password-stdin
-                    docker push ${DOCKER_REGISTRY}/customer-service:${IMAGE_TAG}
-                    docker push ${DOCKER_REGISTRY}/order-service:${IMAGE_TAG}
-                    """
-                }
-            }
-        }
-
-        stage('Install PostgreSQL to TEST') {
-            steps {
-                sh """
-                helm repo add bitnami https://charts.bitnami.com/bitnami
-                helm repo update
-
-                helm upgrade --install postgres bitnami/postgresql \\
-                  --namespace test --create-namespace \\
-                  --set auth.database=${DB_NAME} \\
-                  --set auth.username=${DB_USER} \\
-                  --set auth.password=${DB_PASSWORD}
-                """
-            }
-        }
-
-        stage('Create DB Secrets for TEST') {
-            steps {
-                sh """
-                kubectl create secret generic customer-service-customer-db \\
-                  --from-literal=password=${DB_PASSWORD} \\
-                  -n test --dry-run=client -o yaml | kubectl apply -f -
-
-                kubectl create secret generic order-service-order-db \\
-                  --from-literal=password=${DB_PASSWORD} \\
-                  -n test --dry-run=client -o yaml | kubectl apply -f -
+                docker build -t ${DOCKER_REGISTRY}/blocker-service:${IMAGE_TAG} blocker-service
+                docker build -t ${DOCKER_REGISTRY}/cash-service:${IMAGE_TAG} cash-service
+                docker build -t ${DOCKER_REGISTRY}/exchange-generator-service:${IMAGE_TAG} exchange-generator-service
+                docker build -t ${DOCKER_REGISTRY}/exchange-service:${IMAGE_TAG} exchange-service
+                docker build -t ${DOCKER_REGISTRY}/frontend-service:${IMAGE_TAG} frontend-service
+                docker build -t ${DOCKER_REGISTRY}/notification-service:${IMAGE_TAG} notification-service
+                docker build -t ${DOCKER_REGISTRY}/transfer-service:${IMAGE_TAG} transfer-service
                 """
             }
         }
@@ -132,24 +98,87 @@ pipeline {
         stage('Helm Deploy to TEST') {
             steps {
                 sh """
-                helm upgrade --install customer-service my-microservices-app/charts/customer-service \\
+                helm upgrade --install accounts-service helm/charts/accounts-service \\
                   --namespace test --create-namespace \\
-                  --set image.repository=${DOCKER_REGISTRY}/customer-service \\
+                  --set image.repository=${DOCKER_REGISTRY}/accounts-service \\
                   --set image.tag=${IMAGE_TAG} \\
                   --set ingress.enabled=true \\
                   --set ingress.hosts[0].host=customer.test.local \\
                   --set ingress.hosts[0].paths[0].path="/" \\
                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
 
-                helm upgrade --install order-service my-microservices-app/charts/order-service \\
+                helm upgrade --install api-gateway helm/charts/api-gateway \\
                   --namespace test --create-namespace \\
-                  --set image.repository=${DOCKER_REGISTRY}/order-service \\
+                  --set image.repository=${DOCKER_REGISTRY}/api-gateway \\
                   --set image.tag=${IMAGE_TAG} \\
                   --set ingress.enabled=true \\
                   --set ingress.hosts[0].host=order.test.local \\
                   --set ingress.hosts[0].paths[0].path="/" \\
                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+
+                helm upgrade --install blocker-service helm/charts/blocker-service \\
+                  --namespace test --create-namespace \\
+                  --set image.repository=${DOCKER_REGISTRY}/blocker-service \\
+                  --set image.tag=${IMAGE_TAG} \\
+                  --set ingress.enabled=true \\
+                  --set ingress.hosts[0].host=customer.test.local \\
+                  --set ingress.hosts[0].paths[0].path="/" \\
+                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+
+                helm upgrade --install cash-service helm/charts/cash-service \\
+                  --namespace test --create-namespace \\
+                  --set image.repository=${DOCKER_REGISTRY}/cash-service \\
+                  --set image.tag=${IMAGE_TAG} \\
+                  --set ingress.enabled=true \\
+                  --set ingress.hosts[0].host=customer.test.local \\
+                  --set ingress.hosts[0].paths[0].path="/" \\
+                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+
+                helm upgrade --install exchange-generator-service helm/charts/exchange-generator-service \\
+                  --namespace test --create-namespace \\
+                  --set image.repository=${DOCKER_REGISTRY}/exchange-generator-service \\
+                  --set image.tag=${IMAGE_TAG} \\
+                  --set ingress.enabled=true \\
+                  --set ingress.hosts[0].host=customer.test.local \\
+                  --set ingress.hosts[0].paths[0].path="/" \\
+                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+
+                helm upgrade --install exchange-service helm/charts/exchange-service \\
+                  --namespace test --create-namespace \\
+                  --set image.repository=${DOCKER_REGISTRY}/exchange-service \\
+                  --set image.tag=${IMAGE_TAG} \\
+                  --set ingress.enabled=true \\
+                  --set ingress.hosts[0].host=customer.test.local \\
+                  --set ingress.hosts[0].paths[0].path="/" \\
+                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
                 """
+
+                helm upgrade --install frontend-service helm/charts/frontend-service \\
+                  --namespace test --create-namespace \\
+                  --set image.repository=${DOCKER_REGISTRY}/frontend-service \\
+                  --set image.tag=${IMAGE_TAG} \\
+                  --set ingress.enabled=true \\
+                  --set ingress.hosts[0].host=customer.test.local \\
+                  --set ingress.hosts[0].paths[0].path="/" \\
+                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+
+                helm upgrade --install notification-service helm/charts/notification-service \\
+                  --namespace test --create-namespace \\
+                  --set image.repository=${DOCKER_REGISTRY}/notification-service \\
+                  --set image.tag=${IMAGE_TAG} \\
+                  --set ingress.enabled=true \\
+                  --set ingress.hosts[0].host=customer.test.local \\
+                  --set ingress.hosts[0].paths[0].path="/" \\
+                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+
+                helm upgrade --install transfer-service helm/charts/transfer-service \\
+                  --namespace test --create-namespace \\
+                  --set image.repository=${DOCKER_REGISTRY}/transfer-service \\
+                  --set image.tag=${IMAGE_TAG} \\
+                  --set ingress.enabled=true \\
+                  --set ingress.hosts[0].host=customer.test.local \\
+                  --set ingress.hosts[0].paths[0].path="/" \\
+                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
             }
         }
 
