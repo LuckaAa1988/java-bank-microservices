@@ -191,7 +191,7 @@ pipeline {
         stage('Helm Deploy to PROD') {
             steps {
                                 sh """
-                                helm uninstall $(helm list -n test --short) -n test"
+                                helm uninstall \$(helm list -n test --short) -n test"
 
                                 helm upgrade --install accounts-service helm/charts/accounts-service \\
                                   --namespace prod --create-namespace \\
