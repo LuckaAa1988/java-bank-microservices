@@ -188,6 +188,31 @@ pipeline {
             }
         }
 
+        stage('Delete Test helm deploy') {
+            steps {
+                                sh """
+                                helm uninstall accounts-service"
+
+                                helm uninstall api-gateway"
+
+                                helm uninstall blocker-service"
+
+                                helm uninstall cash-service"
+
+                                helm uninstall exchange-generator-service"
+
+                                helm uninstall exchange-service"
+
+                                helm uninstall frontend-service"
+
+                                helm uninstall notification-service"
+
+                                helm uninstall transfer-service"
+                                """
+            }
+
+        }
+
         stage('Helm Deploy to PROD') {
             steps {
                                 sh """
