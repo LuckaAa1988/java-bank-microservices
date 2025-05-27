@@ -1,10 +1,11 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress
+  name: {{ include "api-gateway.fullname" . }}-ingress
 spec:
   ingressClassName: nginx
   rules:
+    - host: {{ .Release.Namespace }}
     - http:
         paths:
           - path: /
@@ -14,13 +15,6 @@ spec:
                 name: {{ .Chart.Name }}
                 port:
                   number: {{ .Values.service.port }}
-          - path: /realms
-            pathType: Prefix
-            backend:
-              service:
-                name: keycloak
-                port:
-                  number: 8080
           - path: /realms
             pathType: Prefix
             backend:
