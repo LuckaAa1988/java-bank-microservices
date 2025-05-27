@@ -191,23 +191,23 @@ pipeline {
         stage('Delete Test helm deploy') {
             steps {
                                 sh """
-                                helm uninstall accounts-service"
+                                helm uninstall accounts-service -n test"
 
-                                helm uninstall api-gateway"
+                                helm uninstall api-gateway -n test"
 
-                                helm uninstall blocker-service"
+                                helm uninstall blocker-service -n test"
 
-                                helm uninstall cash-service"
+                                helm uninstall cash-service -n test"
 
-                                helm uninstall exchange-generator-service"
+                                helm uninstall exchange-generator-service -n test"
 
-                                helm uninstall exchange-service"
+                                helm uninstall exchange-service -n test"
 
-                                helm uninstall frontend-service"
+                                helm uninstall frontend-service -n test"
 
-                                helm uninstall notification-service"
+                                helm uninstall notification-service -n test"
 
-                                helm uninstall transfer-service"
+                                helm uninstall transfer-service -n test"
                                 """
             }
 
