@@ -175,6 +175,8 @@ pipeline {
                   --set ingress.hosts[0].paths[0].path="/" \\
                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
 
+                helm dependency build"
+
                 helm upgrade --install kafka helm/charts/kafka \\
                   --namespace test --create-namespace \\
                   --set ingress.enabled=true \\
