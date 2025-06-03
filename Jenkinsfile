@@ -98,7 +98,7 @@ pipeline {
 
                 helm repo update
 
-                helm install kafka bitnami/kafka -f values.yaml --namespace test --create-namespace
+                helm install kafka bitnami/kafka -f helm/values.yaml --namespace test --create-namespace
 
                 helm upgrade --install accounts-service helm/charts/accounts-service \\
                   --namespace test --create-namespace \\
