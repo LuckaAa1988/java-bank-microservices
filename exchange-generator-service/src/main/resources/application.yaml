@@ -17,6 +17,11 @@ spring:
             client-secret: ${EXCHANGE_GENERATOR_CLIENT_SECRET}
             scope: profile, openid
             clientAuthenticationMethod: client_secret_post
+  kafka:
+    producer:
+      bootstrap-servers: kafka:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 gateway:
   url: ${GATEWAY_URL}
 server:

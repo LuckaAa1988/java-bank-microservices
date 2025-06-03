@@ -2,8 +2,10 @@ package ru.practicum.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -25,8 +27,9 @@ public class RateServiceImpl implements RateService {
     private final RateMapper rateMapper;
 
     @Override
-    public Flux<Boolean> saveAll(List<RateDto> rates) {
-        return Flux.fromIterable(rates)
+    @KafkaListener(topics = "rates")
+    public Flux<Boolean> saveAll(ConsumerRecord<String, List<RateDto>> rates) {
+        return Flux.fromIterable(rates.value())
                 .flatMap(rateDto -> redisTemplate.opsForValue()
                         .set(PREFIX + rateDto.getCurrency(), rateMapper.fromDto(rateDto)));
     }

@@ -1,18 +1,28 @@
-replicaCount: 1
+replicaCount: 2
 
-image:
-  repository: frontend-service
-  tag: 1.0-SNAPSHOT
-  pullPolicy: IfNotPresent
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: "standard"
 
-service:
-  port: 8084
+volumePermissions:
+  enabled: true
 
-config:
-  AUTHORIZATION_URI: http://localhost:8080/realms/Bank-app/protocol/openid-connect/auth
-  JWK_SET_URI: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
-  TOKEN_URI: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/token
-  GATEWAY_URL: http://api-gateway:8090/
+zookeeper:
+  enabled: true
+  replicaCount: 1
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: "standard"
 
-secrets:
-  FRONTEND_CLIENT_SECRET: 0VghZunY5HM8K7oDHN5aWuvJr9P9Bpeu
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - kafka
+        topologyKey: "kubernetes.io/hostname"

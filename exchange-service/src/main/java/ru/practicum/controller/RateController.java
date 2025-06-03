@@ -18,14 +18,6 @@ public class RateController {
 
     private final RateService rateService;
 
-
-    @PostMapping
-    public Mono<ResponseEntity<Void>> receiveRates(@RequestBody List<RateDto> rates) {
-        return rateService.saveAll(rates)
-                .then(Mono.just(ResponseEntity.ok().build()));
-
-    }
-
     @GetMapping
     public Mono<ResponseEntity<Flux<RateDto>>> getRates() {
         return Mono.just(ResponseEntity.ok().body(rateService.findAll()));
