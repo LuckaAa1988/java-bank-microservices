@@ -175,14 +175,27 @@ pipeline {
                   --set ingress.hosts[0].paths[0].path="/" \\
                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
 
-                helm dependency build"
+                helm dependency update helm/charts/kafka
 
-                helm upgrade --install kafka helm/charts/kafka \\
-                  --namespace test --create-namespace \\
-                  --set ingress.enabled=true \\
-                  --set ingress.hosts[0].host=customer.test.local \\
-                  --set ingress.hosts[0].paths[0].path="/" \\
-                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+                helm upgrade --install kafka helm/charts/kafka \
+                              --namespace test \
+                              --create-namespace \
+                              --set kafka.replicaCount=2 \
+                              --set kafka.persistence.enabled=true \
+                              --set kafka.persistence.size=10Gi \
+                              --set kafka.persistence.storageClass=standard \
+                              --set kafka.volumePermissions.enabled=true \
+                              --set kafka.zookeeper.enabled=true \
+                              --set kafka.zookeeper.replicaCount=1 \
+                              --set kafka.zookeeper.persistence.enabled=true \
+                              --set kafka.zookeeper.persistence.size=5Gi \
+                              --set kafka.zookeeper.persistence.storageClass=standard \
+                              --set kafka.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution[0].labelSelector.matchExpressions[0].key=app.kubernetes.io/name \
+                              --set kafka.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution[0].labelSelector.matchExpressions[0].operator=In \
+                              --set kafka.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution[0].labelSelector.matchExpressions[0].values[0]=kafka \
+                              --set kafka.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution[0].topologyKey=kubernetes.io/hostname \
+                              --atomic \
+                              --timeout 5m
                 """
             }
         }
@@ -293,12 +306,27 @@ pipeline {
                                   --set ingress.hosts[0].paths[0].path="/" \\
                                   --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
 
-                                helm upgrade --install kafka helm/charts/kafka \\
-                                  --namespace prod --create-namespace \\
-                                  --set ingress.enabled=true \\
-                                  --set ingress.hosts[0].host=customer.prod.local \\
-                                  --set ingress.hosts[0].paths[0].path="/" \\
-                                  --set ingress.hosts[0].paths[0].pathType="ImplementationSpecific"
+                                helm dependency update helm/charts/kafka
+
+                                helm upgrade --install kafka helm/charts/kafka \
+                                          --namespace prod \
+                                          --create-namespace \
+                                          --set kafka.replicaCount=2 \
+                                          --set kafka.persistence.enabled=true \
+                                          --set kafka.persistence.size=10Gi \
+                                          --set kafka.persistence.storageClass=standard \
+                                          --set kafka.volumePermissions.enabled=true \
+                                          --set kafka.zookeeper.enabled=true \
+                                          --set kafka.zookeeper.replicaCount=1 \
+                                          --set kafka.zookeeper.persistence.enabled=true \
+                                          --set kafka.zookeeper.persistence.size=5Gi \
+                                          --set kafka.zookeeper.persistence.storageClass=standard \
+                                          --set kafka.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution[0].labelSelector.matchExpressions[0].key=app.kubernetes.io/name \
+                                          --set kafka.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution[0].labelSelector.matchExpressions[0].operator=In \
+                                          --set kafka.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution[0].labelSelector.matchExpressions[0].values[0]=kafka \
+                                          --set kafka.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution[0].topologyKey=kubernetes.io/hostname \
+                                          --atomic \
+                                          --timeout 5m
                                 """
             }
         }
