@@ -94,6 +94,10 @@ pipeline {
         stage('Helm Deploy to TEST') {
             steps {
                 sh """
+                helm repo add bitnami https://charts.bitnami.com/bitnami
+
+                helm repo update
+
                 helm install kafka bitnami/kafka -f values.yaml --namespace test --create-namespace
 
                 helm upgrade --install accounts-service helm/charts/accounts-service \\
