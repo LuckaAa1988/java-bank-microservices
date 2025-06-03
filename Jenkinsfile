@@ -94,6 +94,8 @@ pipeline {
         stage('Helm Deploy to TEST') {
             steps {
                 sh """
+                helm install kafka bitnami/kafka -f values.yaml --namespace test --create-namespace
+
                 helm upgrade --install accounts-service helm/charts/accounts-service \\
                   --namespace test --create-namespace \\
                   --set image.repository=${DOCKER_REGISTRY}/accounts-service \\

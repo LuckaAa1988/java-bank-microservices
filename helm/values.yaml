@@ -1,0 +1,28 @@
+replicaCount: 2
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: "standard"  # или свой, если в кластере другой
+
+volumePermissions:
+  enabled: true
+
+zookeeper:
+  enabled: true
+  replicaCount: 1  # можно 1, если ресурсов мало
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: "standard"
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - kafka
+        topologyKey: "kubernetes.io/hostname"
