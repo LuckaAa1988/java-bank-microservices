@@ -34,6 +34,7 @@
 - API Gateway (Spring Cloud Gateway)
 - Авторизация (Keycloak)
 - Kubernetes
+- Kafka
 - Helm
 - Jenkins
 
