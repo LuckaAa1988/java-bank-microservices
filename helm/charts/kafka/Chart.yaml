@@ -1,0 +1,11 @@
+apiVersion: v2
+name: kafka
+description: Kafka in KRaft mode via Bitnami Helm dependency
+type: application
+version: 0.1.0
+appVersion: "4.0.0"
+
+dependencies:
+  - name: kafka
+    version: 26.8.0
+    repository: https://charts.bitnami.com/bitnami

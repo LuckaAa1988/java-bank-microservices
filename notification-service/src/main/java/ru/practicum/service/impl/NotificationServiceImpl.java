@@ -1,6 +1,9 @@
 package ru.practicum.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -12,6 +15,7 @@ import ru.practicum.service.NotificationService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,19 +24,21 @@ import java.util.regex.Pattern;
 public class NotificationServiceImpl implements NotificationService {
 
     private final DatabaseClient databaseClient;
+    private final ObjectMapper objectMapper;
 
     @Override
-    public Mono<Void> addNotification(NotificationDto notificationDto) {
+    @KafkaListener(topics = "notifications", groupId = "bank-kafka")
+    public void addNotification(@Payload NotificationDto notificationDto) {
         var username = notificationDto.getUsername();
         var type = notificationDto.getException() == null ? "SUCCESS" : "FAIL";
-        return databaseClient.sql("INSERT INTO notifications (username, message, type, showed) " +
+        databaseClient.sql("INSERT INTO notifications (username, message, type, showed) " +
                         "VALUES (:username, :message, :type, :showed)")
                 .bind("username", username)
                 .bind("message", notificationDto.getData())
                 .bind("type", type)
                 .bind("showed", false)
                 .fetch()
-                .one().then();
+                .one().subscribe();
     }
 
     @Override

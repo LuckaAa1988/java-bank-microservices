@@ -6,10 +6,11 @@ import reactor.core.publisher.Mono;
 import ru.practicum.model.dto.RateDto;
 
 import java.util.List;
+import java.util.Map;
 
 public interface RateService {
 
-    Flux<Boolean> saveAll(ConsumerRecord<String, List<RateDto>> rates);
+    void saveAll(List<Map<String, Object>> rawRates);
 
     Flux<RateDto> findAll();
 

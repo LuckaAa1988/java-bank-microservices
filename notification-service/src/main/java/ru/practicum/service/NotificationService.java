@@ -5,8 +5,11 @@ import reactor.core.publisher.Mono;
 import ru.practicum.model.dto.NotificationDto;
 import ru.practicum.model.dto.NotificationResponse;
 
+import java.util.List;
+import java.util.Map;
+
 public interface NotificationService {
-    Mono<Void> addNotification(NotificationDto notificationDto);
+    void addNotification(NotificationDto notificationDto);
 
     Flux<NotificationResponse> getNotifications(String username);
 }

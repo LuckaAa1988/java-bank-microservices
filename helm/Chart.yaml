@@ -41,3 +41,7 @@ dependencies:
   - name: api-gateway
     version: "0.1.0"
     repository: "file://./charts/api-gateway"
+
+  - name: kafka
+    version: "0.1.0"
+    repository: "file://./charts/kafka"

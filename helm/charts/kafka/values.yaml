@@ -1,0 +1,45 @@
+kafka:
+  fullnameOverride: kafka
+
+  clusterId: "bank-kafka"
+
+  kraft:
+    enabled: true
+
+  replicaCount: 3
+
+  listeners:
+    client:
+      protocol: PLAINTEXT
+
+  persistence:
+    enabled: true
+    storageClass: "standard"
+    size: 10Gi
+
+  volumePermissions:
+    enabled: true
+
+  externalAccess:
+    enabled: false
+
+  metrics:
+    kafka:
+      enabled: false
+
+  provisioning:
+    enabled: false
+
+  zookeeper:
+    enabled: false
+
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - kafka
+          topologyKey: "kubernetes.io/hostname"

@@ -2,6 +2,7 @@ package ru.practicum.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import ru.practicum.client.AccountsClient;
@@ -22,6 +23,8 @@ public class TransferServiceImpl implements TransferService {
     private final BlockerClient blockerClient;
     private final NotificationClient notificationClient;
     private final ExchangeClient exchangeClient;
+    private final KafkaTemplate<String, NotificationDto> kafkaTemplate;
+
 
     @Override
     public Mono<Void> internalTransfer(InternalTransferRequest internalTransferRequest) {
@@ -41,23 +44,26 @@ public class TransferServiceImpl implements TransferService {
                             .withdrawAmount(internalTransferRequest.getAmount())
                             .build();
                     return accountsClient.transfer(accountTransferRequest)
-                            .then(notificationClient.sendSuccessNotification(NotificationDto.builder()
+                            .then(Mono.fromRunnable(() ->
+                                    kafkaTemplate.send("notifications",
+                                            internalTransferRequest.getUsername(), NotificationDto.builder()
                                     .username(internalTransferRequest.getUsername())
                                     .data(String.format("Перевод со счёта %s на счёт %s на сумму %s успешно совершен!",
                                             internalTransferRequest.getFromAccount(),
                                             internalTransferRequest.getToAccount(),
                                             internalTransferRequest.getAmount()))
-                                    .build()));
+                                    .build()))).then();
                 })
-                .onErrorResume(error -> notificationClient.sendFailureNotification(NotificationDto.builder()
+                .onErrorResume(error -> Mono.fromRunnable(() ->
+                        kafkaTemplate.send("notifications",
+                                        internalTransferRequest.getUsername(), NotificationDto.builder()
                                 .username(internalTransferRequest.getUsername())
                                 .data(String.format("Перевод со счёта %s на счёт %s на сумму %s заблокирован!",
                                         internalTransferRequest.getFromAccount(),
                                         internalTransferRequest.getToAccount(),
                                         internalTransferRequest.getAmount()))
                                 .exception(error.getMessage())
-                                .build())
-                        .then(Mono.error(error)));
+                                .build()))).then();
     }
 
     @Override
@@ -78,16 +84,20 @@ public class TransferServiceImpl implements TransferService {
                             .withdrawAmount(externalTransferRequest.getAmount())
                             .build();
                     return accountsClient.transfer(accountTransferRequest)
-                            .then(notificationClient.sendSuccessNotification(NotificationDto.builder()
+                            .then(Mono.fromRunnable(() ->
+                                    kafkaTemplate.send("notifications",
+                                            externalTransferRequest.getUsername(),NotificationDto.builder()
                                     .username(externalTransferRequest.getUsername())
                                     .data(String.format("Перевод со счёта %s на счёт %s (Пользователь: %s) на сумму %s успешно совершен!",
                                             externalTransferRequest.getFromAccount(),
                                             externalTransferRequest.getToAccount(),
                                             externalTransferRequest.getToUser(),
                                             externalTransferRequest.getAmount()))
-                                    .build()));
+                                    .build()))).then();
                 })
-                .onErrorResume(error -> notificationClient.sendFailureNotification(NotificationDto.builder()
+                .onErrorResume(error -> Mono.fromRunnable(() ->
+                        kafkaTemplate.send("notifications",
+                                        externalTransferRequest.getUsername(),NotificationDto.builder()
                                 .username(externalTransferRequest.getUsername())
                                 .data(String.format("Перевод со счёта %s на счёт %s (Пользователь: %s) на сумму %s заблокирован!",
                                         externalTransferRequest.getFromAccount(),
@@ -95,8 +105,7 @@ public class TransferServiceImpl implements TransferService {
                                         externalTransferRequest.getToUser(),
                                         externalTransferRequest.getAmount()))
                                 .exception(error.getMessage())
-                                .build())
-                        .then(Mono.error(error)));
+                                .build()))).then();
     }
 
     public Mono<BigDecimal> exchangeCurrency(String from, String to, BigDecimal amount) {

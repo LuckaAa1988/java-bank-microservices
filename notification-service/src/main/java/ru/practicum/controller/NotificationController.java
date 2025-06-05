@@ -28,9 +28,4 @@ public class NotificationController {
         return notificationService.getNotifications(username);
 
     }
-
-    @PostMapping
-    public Mono<ResponseEntity<Mono<Void>>> addNotification(@RequestBody NotificationDto notificationDto) {
-        return Mono.just(ResponseEntity.ok(notificationService.addNotification(notificationDto)));
-    }
 }

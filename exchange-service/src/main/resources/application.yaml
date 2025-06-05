@@ -13,8 +13,13 @@ spring:
   kafka:
     consumer:
       bootstrap-servers: kafka:9092
-      group-id: exchange-consumer
+      group-id: bank-kafka
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: latest
+      enable-auto-commit: true
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.type: java.util.List<ru.practicum.model.dto.RateDto>
 server:
   port: 8082

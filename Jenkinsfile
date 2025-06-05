@@ -94,6 +94,12 @@ pipeline {
         stage('Helm Deploy to TEST') {
             steps {
                 sh """
+                helm dependency build helm/charts/kafka
+
+                helm upgrade --install kafka helm/charts/kafka \\
+                  --namespace test --create-namespace \\
+                  -f helm/charts/kafka/values.yaml
+
                 helm upgrade --install accounts-service helm/charts/accounts-service \\
                   --namespace test --create-namespace \\
                   --set image.repository=${DOCKER_REGISTRY}/accounts-service \\
@@ -187,6 +193,7 @@ pipeline {
         stage('Delete Test helm deploy') {
             steps {
                 sh """
+                    helm uninstall kafka -n test || true
                     helm uninstall accounts-service -n test || true
                     helm uninstall api-gateway -n test || true
                     helm uninstall blocker-service -n test || true
@@ -203,6 +210,12 @@ pipeline {
         stage('Helm Deploy to PROD') {
             steps {
                                 sh """
+                                helm dependency build helm/charts/kafka
+
+                                helm upgrade --install kafka helm/charts/kafka \\
+                                  --namespace prod --create-namespace \\
+                                  -f helm/charts/kafka/values.yaml
+
                                 helm upgrade --install accounts-service helm/charts/accounts-service \\
                                   --namespace prod --create-namespace \\
                                   --set image.repository=${DOCKER_REGISTRY}/accounts-service \\

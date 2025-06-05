@@ -6,6 +6,7 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private final DatabaseClient databaseClient;
     private final PasswordEncoder passwordEncoder;
     private final NotificationClient notificationClient;
+    private final KafkaTemplate<String, NotificationDto> kafkaTemplate;
     private final Keycloak keycloak;
     @Value("${keycloak.realmName}")
     private String realmName;
@@ -83,10 +85,11 @@ public class UserServiceImpl implements UserService {
                                             .resetPassword(credential)
                             ).subscribeOn(Schedulers.boundedElastic());
                         })
-                        .then(notificationClient.sendNotification(NotificationDto.builder()
+                        .then(Mono.fromRunnable(() ->
+                                kafkaTemplate.send("notifications", username, NotificationDto.builder()
                                 .username(username)
                                 .data(String.format("Пароль пользователя %s успешно изменен", username))
-                                .build())));
+                                .build()))));
     }
 
     @Override
@@ -123,10 +126,11 @@ public class UserServiceImpl implements UserService {
                                             .update(user)
                             ).subscribeOn(Schedulers.boundedElastic());
                         })
-                        .then(notificationClient.sendNotification(NotificationDto.builder()
+                        .then(Mono.fromRunnable(() ->
+                                kafkaTemplate.send("notifications", username, NotificationDto.builder()
                                 .username(username)
                                 .data(String.format("Данные пользователя %s успешно изменены", username))
-                                .build())));
+                                .build()))));
     }
 
     @Override

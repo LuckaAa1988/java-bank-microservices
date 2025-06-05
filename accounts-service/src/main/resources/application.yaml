@@ -24,6 +24,16 @@ spring:
     url: ${ACCOUNTS_DB_URL}
     username: ${ACCOUNTS_DB_USER}
     password: ${ACCOUNTS_DB_PASSWORD}
+  kafka:
+    producer:
+      bootstrap-servers: kafka:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+        delivery.timeout.ms: 30000
   jpa:
     hibernate:
       ddl-auto: none
