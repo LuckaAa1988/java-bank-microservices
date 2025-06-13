@@ -12,3 +12,4 @@ config:
   JWK_SET_URI: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
   EXCHANGE_REDIS_HOST: redis
   EXCHANGE_REDIS_PORT: 6379
+  ZIPKIN_URL: http://zipkin:9411/api/v2/spans

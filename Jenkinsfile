@@ -61,7 +61,7 @@ pipeline {
         stage('Delete Test helm deploy') {
             steps {
                 script {
-                    def services = ['kafka'] + [
+                    def services = ['kafka', 'prometheus', 'zipkin'] + [
                         'accounts-service', 'api-gateway', 'blocker-service', 'cash-service',
                         'exchange-generator-service', 'exchange-service', 'frontend-service',
                         'notification-service', 'transfer-service'
@@ -102,6 +102,22 @@ def helmDeploy(namespace) {
         helm upgrade --install kafka helm/charts/kafka \\
         --namespace ${namespace} --create-namespace \\
         -f helm/charts/kafka/values.yaml
+    """
+
+    sh "helm dependency build helm/charts/zipkin"
+
+    sh """
+        helm upgrade --install zipkin helm/charts/zipkin \\
+        --namespace ${namespace} --create-namespace \\
+        -f helm/charts/zipkin/values.yaml
+    """
+
+    sh "helm dependency build helm/charts/prometheus"
+
+    sh """
+        helm upgrade --install prometheus helm/charts/prometheus \\
+        --namespace ${namespace} --create-namespace \\
+        -f helm/charts/prometheus/values.yaml
     """
 
     services.each { svc ->

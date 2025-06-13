@@ -4,3 +4,4 @@ metadata:
   name: {{ include "blocker-service.fullname" . }}-config
 data:
   JWK_SET_URI: {{ .Values.config.JWK_SET_URI | quote }}
+  ZIPKIN_URL: {{.Values.config.ZIPKIN_URL | quote}}

@@ -1,0 +1,34 @@
+prometheus:
+  server:
+    global:
+      scrape_interval: 30s
+      evaluation_interval: 30s
+      scrape_timeout: 10s
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: [ 'http://localhost:9090' ]
+      - job_name: 'accounts-service'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: [ 'http://accounts-service:8083' ]
+            labels:
+              app: 'accounts-service'
+      - job_name: 'api-gateway'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: [ 'http://api-gateway:8090' ]
+            labels:
+              app: 'api-gateway'
+      - job_name: 'blocker-service'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: [ 'http://blocker-service:8087' ]
+            labels:
+              app: 'blocker-service'
+      - job_name: 'cash-service'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: [ 'http://cash-service:8085' ]
+            labels:
+              app: 'cash-service'

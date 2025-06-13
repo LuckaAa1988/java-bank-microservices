@@ -59,3 +59,14 @@ gateway:
   url: ${GATEWAY_URL}
 server:
   port: 8083
+management:
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL}
+  tracing:
+    sampling:
+      probability: 1
+  endpoints:
+    web:
+      exposure:
+        include: prometheus

@@ -92,3 +92,14 @@ logging:
     org.springframework.security.oauth2: DEBUG
     org.springframework.web: DEBUG
     org.springframework.boot.autoconfigure.security: DEBUG
+management:
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL}
+  tracing:
+    sampling:
+      probability: 1
+  endpoints:
+    web:
+      exposure:
+        include: prometheus

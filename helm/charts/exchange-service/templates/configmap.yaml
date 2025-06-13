@@ -6,3 +6,4 @@ data:
   JWK_SET_URI: {{ .Values.config.JWK_SET_URI | quote }}
   EXCHANGE_REDIS_HOST: {{ .Values.config.EXCHANGE_REDIS_HOST | quote }}
   EXCHANGE_REDIS_PORT: {{ .Values.config.EXCHANGE_REDIS_PORT | quote }}
+  ZIPKIN_URL: {{.Values.config.ZIPKIN_URL | quote}}

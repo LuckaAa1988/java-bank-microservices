@@ -23,3 +23,14 @@ spring:
         spring.json.value.type: java.util.List<ru.practicum.model.dto.RateDto>
 server:
   port: 8082
+management:
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL}
+  tracing:
+    sampling:
+      probability: 1
+  endpoints:
+    web:
+      exposure:
+        include: prometheus

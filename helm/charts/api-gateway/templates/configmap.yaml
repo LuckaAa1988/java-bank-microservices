@@ -6,3 +6,4 @@ data:
   AUTHORIZATION_URI: {{ .Values.config.AUTHORIZATION_URI | quote }}
   JWK_SET_URI: {{ .Values.config.JWK_SET_URI | quote }}
   TOKEN_URI: {{ .Values.config.TOKEN_URI | quote }}
+  ZIPKIN_URL: {{.Values.config.ZIPKIN_URL | quote}}

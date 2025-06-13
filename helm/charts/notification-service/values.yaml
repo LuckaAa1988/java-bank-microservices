@@ -13,6 +13,7 @@ config:
   NOTIFICATION_DB_URL: r2dbc:postgresql://notification-db:5432/notification
   NOTIFICATION_DB_NAME: notification
   NOTIFICATION_DB_USER: user
+  ZIPKIN_URL: http://zipkin:9411/api/v2/spans
 
 secrets:
   NOTIFICATION_DB_PASSWORD: "12345"

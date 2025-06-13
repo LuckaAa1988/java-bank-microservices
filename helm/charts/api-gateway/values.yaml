@@ -13,6 +13,7 @@ config:
   JWK_SET_URI: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/certs
   TOKEN_URI: http://keycloak:8080/realms/Bank-app/protocol/openid-connect/token
   GATEWAY_URL: http://api-gateway:8090/
+  ZIPKIN_URL: http://zipkin:9411/api/v2/spans
 
 secrets:
   GATEWAY_CLIENT_SECRET: uKN4nnqF5Rd3zjd53DYSGt2MkFIQQXgV

@@ -9,3 +9,4 @@ data:
   NOTIFICATION_DB_USER: {{ .Values.config.NOTIFICATION_DB_USER | quote }}
   POSTGRES_DB: {{ .Values.config.NOTIFICATION_DB_NAME | quote }}
   POSTGRES_USER: {{ .Values.config.NOTIFICATION_DB_USER | quote }}
+  ZIPKIN_URL: {{.Values.config.ZIPKIN_URL | quote}}

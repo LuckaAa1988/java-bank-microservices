@@ -18,6 +18,7 @@ config:
   ACCOUNTS_DB_NAME: bank
   ACCOUNTS_DB_USER: user
   GATEWAY_URL: http://api-gateway:8090/
+  ZIPKIN_URL: http://zipkin:9411/api/v2/spans
 
 secrets:
   ACCOUNTS_DB_PASSWORD: "12345"
