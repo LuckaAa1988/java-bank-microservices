@@ -4,31 +4,58 @@ prometheus:
       scrape_interval: 30s
       evaluation_interval: 30s
       scrape_timeout: 10s
-    scrape_configs:
-      - job_name: 'prometheus'
-        static_configs:
-          - targets: [ 'http://localhost:9090' ]
-      - job_name: 'accounts-service'
-        metrics_path: '/actuator/prometheus'
-        static_configs:
-          - targets: [ 'http://accounts-service:8083' ]
-            labels:
-              app: 'accounts-service'
-      - job_name: 'api-gateway'
-        metrics_path: '/actuator/prometheus'
-        static_configs:
-          - targets: [ 'http://api-gateway:8090' ]
-            labels:
-              app: 'api-gateway'
-      - job_name: 'blocker-service'
-        metrics_path: '/actuator/prometheus'
-        static_configs:
-          - targets: [ 'http://blocker-service:8087' ]
-            labels:
-              app: 'blocker-service'
-      - job_name: 'cash-service'
-        metrics_path: '/actuator/prometheus'
-        static_configs:
-          - targets: [ 'http://cash-service:8085' ]
-            labels:
-              app: 'cash-service'
+  extraScrapeConfigs: |
+    - job_name: 'accounts-service'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: [ 'accounts-service:8083' ]
+          labels:
+            app: 'accounts-service'
+    - job_name: 'api-gateway'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: [ 'api-gateway:8090' ]
+          labels:
+            app: 'api-gateway'
+    - job_name: 'blocker-service'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: [ 'blocker-service:8087' ]
+          labels:
+            app: 'blocker-service'
+    - job_name: 'cash-service'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: [ 'cash-service:8085' ]
+          labels:
+            app: 'cash-service'
+    - job_name: 'exchange-generator-service'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: [ 'exchange-generator-service:8081' ]
+          labels:
+            app: 'exchange-generator-service'
+    - job_name: 'exchange-service'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: [ 'exchange-service:8082' ]
+          labels:
+            app: 'exchange-service'
+    - job_name: 'frontend-service'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: [ 'frontend-service:8084' ]
+          labels:
+            app: 'frontend-service'
+    - job_name: 'notification-service'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: [ 'notification-service:8088' ]
+          labels:
+            app: 'notification-service'
+    - job_name: 'transfer-service'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: [ 'transfer-service:8086' ]
+          labels:
+            app: 'transfer-service'

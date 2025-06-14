@@ -1,14 +1,13 @@
 package ru.practicum.service.impl;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import ru.practicum.client.AccountsClient;
 import ru.practicum.client.BlockerClient;
 import ru.practicum.client.ExchangeClient;
-import ru.practicum.client.NotificationClient;
 import ru.practicum.model.dto.*;
 import ru.practicum.service.TransferService;
 
@@ -21,9 +20,9 @@ public class TransferServiceImpl implements TransferService {
 
     private final AccountsClient accountsClient;
     private final BlockerClient blockerClient;
-    private final NotificationClient notificationClient;
     private final ExchangeClient exchangeClient;
     private final KafkaTemplate<String, NotificationDto> kafkaTemplate;
+    private final MeterRegistry meterRegistry;
 
 
     @Override
@@ -47,23 +46,30 @@ public class TransferServiceImpl implements TransferService {
                             .then(Mono.fromRunnable(() ->
                                     kafkaTemplate.send("notifications",
                                             internalTransferRequest.getUsername(), NotificationDto.builder()
-                                    .username(internalTransferRequest.getUsername())
-                                    .data(String.format("Перевод со счёта %s на счёт %s на сумму %s успешно совершен!",
-                                            internalTransferRequest.getFromAccount(),
-                                            internalTransferRequest.getToAccount(),
-                                            internalTransferRequest.getAmount()))
-                                    .build()))).then();
+                                                    .username(internalTransferRequest.getUsername())
+                                                    .data(String.format("Перевод со счёта %s на счёт %s на сумму %s успешно совершен!",
+                                                            internalTransferRequest.getFromAccount(),
+                                                            internalTransferRequest.getToAccount(),
+                                                            internalTransferRequest.getAmount()))
+                                                    .build()))).then();
                 })
-                .onErrorResume(error -> Mono.fromRunnable(() ->
-                        kafkaTemplate.send("notifications",
-                                        internalTransferRequest.getUsername(), NotificationDto.builder()
-                                .username(internalTransferRequest.getUsername())
-                                .data(String.format("Перевод со счёта %s на счёт %s на сумму %s заблокирован!",
-                                        internalTransferRequest.getFromAccount(),
-                                        internalTransferRequest.getToAccount(),
-                                        internalTransferRequest.getAmount()))
-                                .exception(error.getMessage())
-                                .build()))).then();
+                .onErrorResume(error -> {
+                    meterRegistry.counter("transfer_block",
+                            "userFrom", internalTransferRequest.getUsername(),
+                            "accountFrom", internalTransferRequest.getFromAccount(),
+                            "userTo", internalTransferRequest.getUsername(),
+                            "accountTo", internalTransferRequest.getToAccount()).increment();
+                    return Mono.fromRunnable(() ->
+                            kafkaTemplate.send("notifications",
+                                    internalTransferRequest.getUsername(), NotificationDto.builder()
+                                            .username(internalTransferRequest.getUsername())
+                                            .data(String.format("Перевод со счёта %s на счёт %s на сумму %s заблокирован!",
+                                                    internalTransferRequest.getFromAccount(),
+                                                    internalTransferRequest.getToAccount(),
+                                                    internalTransferRequest.getAmount()))
+                                            .exception(error.getMessage())
+                                            .build()));
+                }).then();
     }
 
     @Override
@@ -86,26 +92,33 @@ public class TransferServiceImpl implements TransferService {
                     return accountsClient.transfer(accountTransferRequest)
                             .then(Mono.fromRunnable(() ->
                                     kafkaTemplate.send("notifications",
-                                            externalTransferRequest.getUsername(),NotificationDto.builder()
-                                    .username(externalTransferRequest.getUsername())
-                                    .data(String.format("Перевод со счёта %s на счёт %s (Пользователь: %s) на сумму %s успешно совершен!",
-                                            externalTransferRequest.getFromAccount(),
-                                            externalTransferRequest.getToAccount(),
-                                            externalTransferRequest.getToUser(),
-                                            externalTransferRequest.getAmount()))
-                                    .build()))).then();
+                                            externalTransferRequest.getUsername(), NotificationDto.builder()
+                                                    .username(externalTransferRequest.getUsername())
+                                                    .data(String.format("Перевод со счёта %s на счёт %s (Пользователь: %s) на сумму %s успешно совершен!",
+                                                            externalTransferRequest.getFromAccount(),
+                                                            externalTransferRequest.getToAccount(),
+                                                            externalTransferRequest.getToUser(),
+                                                            externalTransferRequest.getAmount()))
+                                                    .build()))).then();
                 })
-                .onErrorResume(error -> Mono.fromRunnable(() ->
-                        kafkaTemplate.send("notifications",
-                                        externalTransferRequest.getUsername(),NotificationDto.builder()
-                                .username(externalTransferRequest.getUsername())
-                                .data(String.format("Перевод со счёта %s на счёт %s (Пользователь: %s) на сумму %s заблокирован!",
-                                        externalTransferRequest.getFromAccount(),
-                                        externalTransferRequest.getToAccount(),
-                                        externalTransferRequest.getToUser(),
-                                        externalTransferRequest.getAmount()))
-                                .exception(error.getMessage())
-                                .build()))).then();
+                .onErrorResume(error -> {
+                    meterRegistry.counter("transfer_block",
+                            "userFrom", externalTransferRequest.getUsername(),
+                            "accountFrom", externalTransferRequest.getFromAccount(),
+                            "userTo", externalTransferRequest.getToUser(),
+                            "accountTo", externalTransferRequest.getToAccount()).increment();
+                    return Mono.fromRunnable(() ->
+                            kafkaTemplate.send("notifications",
+                                    externalTransferRequest.getUsername(), NotificationDto.builder()
+                                            .username(externalTransferRequest.getUsername())
+                                            .data(String.format("Перевод со счёта %s на счёт %s (Пользователь: %s) на сумму %s заблокирован!",
+                                                    externalTransferRequest.getFromAccount(),
+                                                    externalTransferRequest.getToAccount(),
+                                                    externalTransferRequest.getToUser(),
+                                                    externalTransferRequest.getAmount()))
+                                            .exception(error.getMessage())
+                                            .build()));
+                }).then();
     }
 
     public Mono<BigDecimal> exchangeCurrency(String from, String to, BigDecimal amount) {

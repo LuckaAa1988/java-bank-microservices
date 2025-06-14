@@ -1,30 +1,20 @@
 package ru.practicum.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import ru.practicum.mapper.NotificationMapper;
 import ru.practicum.model.dto.NotificationDto;
 import ru.practicum.model.dto.NotificationResponse;
 import ru.practicum.service.NotificationService;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
     private final DatabaseClient databaseClient;
-    private final ObjectMapper objectMapper;
 
     @Override
     @KafkaListener(topics = "notifications", groupId = "bank-kafka")
