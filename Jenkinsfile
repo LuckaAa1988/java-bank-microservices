@@ -112,6 +112,10 @@ def helmDeploy(namespace) {
         -f helm/charts/zipkin/values.yaml
     """
 
+    sh "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts"
+
+    sh "helm repo update"
+
     sh "helm dependency build helm/charts/prometheus"
 
     sh """
@@ -119,6 +123,10 @@ def helmDeploy(namespace) {
         --namespace ${namespace} --create-namespace \\
         -f helm/charts/prometheus/values.yaml
     """
+
+    sh "helm repo add grafana https://grafana.github.io/helm-charts"
+
+    sh "helm repo update"
 
     sh "helm dependency build helm/charts/grafana"
 
