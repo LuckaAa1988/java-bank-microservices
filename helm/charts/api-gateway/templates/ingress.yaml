@@ -36,3 +36,10 @@ spec:
                 name: zipkin
                 port:
                   number: 9411
+          - path: /grafana
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3000
