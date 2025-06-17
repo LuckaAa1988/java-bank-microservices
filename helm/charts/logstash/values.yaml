@@ -1,0 +1,22 @@
+logstash:
+  fullnameOverride: logstash
+  logstashPipeline:
+    logstash.conf: |
+      input {
+        kafka {
+          bootstrap_servers => "kafka:9092"
+          topics => ["accounts-service-logs"]
+          group_id => "bank-group"
+          decorate_events => extended
+        }
+      }
+      filter {
+      }
+      output {
+        elasticsearch {
+          hosts => ["http://elasticsearch:9200"]
+          index => "logs-%{+dd.MM.YYYY}"
+          retry_on_conflict => 3
+          action => "index"
+        }
+      }

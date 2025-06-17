@@ -1,0 +1,3 @@
+elasticsearch:
+  fullnameOverride: elasticsearch
+  antiAffinity: "soft"

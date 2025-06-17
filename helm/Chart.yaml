@@ -57,3 +57,11 @@ dependencies:
   - name: grafana
     version: "0.1.0"
     repository: "file://./charts/grafana"
+
+  - name: logstash
+    version: "0.1.0"
+    repository: "file://./charts/logstash"
+
+  - name: elasticsearch
+    version: 0.1.0
+    repository: "file://./charts/elasticsearch"

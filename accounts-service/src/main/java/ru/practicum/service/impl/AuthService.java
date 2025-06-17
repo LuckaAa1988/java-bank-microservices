@@ -59,6 +59,8 @@ public class AuthService {
                                 .users()
                                 .get(userId)
                                 .resetPassword(credential);
+
+                        log.info("{}", user.getUsername());
                     }
                     return Mono.just(user);
                 });
