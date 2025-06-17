@@ -124,6 +124,34 @@ def helmDeploy(namespace) {
         -f helm/charts/prometheus/values.yaml
     """
 
+    sh "helm repo add elastic https://helm.elastic.co"
+
+    sh "helm repo update"
+
+    sh "helm dependency build helm/charts/logstash"
+
+    sh """
+        helm upgrade --install logstash helm/charts/logstash \\
+        --namespace ${namespace} --create-namespace \\
+        -f helm/charts/logstash/values.yaml
+    """
+
+    sh "helm dependency build helm/charts/elasticsearch"
+
+    sh """
+        helm upgrade --install elasticsearch helm/charts/elasticsearch \\
+        --namespace ${namespace} --create-namespace \\
+        -f helm/charts/elasticsearch/values.yaml
+    """
+
+    sh "helm dependency build helm/charts/kibana"
+
+    sh """
+        helm upgrade --install kibana helm/charts/kibana \\
+        --namespace ${namespace} --create-namespace \\
+        -f helm/charts/kibana/values.yaml
+    """
+
     sh "helm repo add grafana https://grafana.github.io/helm-charts"
 
     sh "helm repo update"
