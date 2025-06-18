@@ -5,12 +5,25 @@ logstash:
       input {
         kafka {
           bootstrap_servers => "kafka:9092"
-          topics => ["accounts-service-logs"]
+          topics => ["bank-logs"]
           group_id => "bank-group"
           decorate_events => extended
         }
       }
       filter {
+        grok {
+          match => { 
+                  "message" => "%{TIME:log_time} \[%{DATA:service}\] %{LOGLEVEL:level}: %{GREEDYDATA:msg_body}"
+          }
+        }
+         grok {
+           match => {
+            "msg_body" => [
+              "%{DATA:event_type}: username(?:From)?: %{WORD:usernameFrom}?,? usernameTo: %{WORD:usernameTo}?,? accountFrom: %{WORD:accountFrom}?,? accountTo: %{WORD:accountTo}?,? account: %{WORD:account}?"
+            ]
+          }
+         tag_on_failure => []
+        }
       }
       output {
         elasticsearch {

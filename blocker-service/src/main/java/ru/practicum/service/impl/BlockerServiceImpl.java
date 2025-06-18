@@ -3,12 +3,14 @@ package ru.practicum.service.impl;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import ru.practicum.exception.BlockerException;
 import ru.practicum.service.BlockerService;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BlockerServiceImpl implements BlockerService {
 
@@ -22,6 +24,7 @@ public class BlockerServiceImpl implements BlockerService {
 
         if (isUnlucky) {
             meterRegistry.counter("blocked", "user", username).increment();
+            log.error("Заблокировано действие: username: {}", username);
             return Mono.error(new BlockerException("Тебе не повезло"));
         }
         return Mono.empty();

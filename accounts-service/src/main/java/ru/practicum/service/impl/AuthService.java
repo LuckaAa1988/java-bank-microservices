@@ -60,9 +60,9 @@ public class AuthService {
                                 .get(userId)
                                 .resetPassword(credential);
 
-                        log.info("{}", user.getUsername());
+                        log.info("Зарегистрирован: username: {}", user.getUsername());
                     }
                     return Mono.just(user);
-                });
+                }).doOnError(e -> log.error("Ошибка при регистрации: username: {}", userRegistrationDto.getUsername()));
     }
 }

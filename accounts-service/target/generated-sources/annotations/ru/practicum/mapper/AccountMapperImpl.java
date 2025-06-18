@@ -7,7 +7,7 @@ import ru.practicum.model.entity.Account;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-06-03T22:54:31+0300",
+    date = "2025-06-17T20:16:56+0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.1 (Amazon.com Inc.)"
 )
 @Component

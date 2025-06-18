@@ -2,6 +2,7 @@ package ru.practicum.service.impl;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -15,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TransferServiceImpl implements TransferService {
 
@@ -43,15 +45,21 @@ public class TransferServiceImpl implements TransferService {
                             .withdrawAmount(internalTransferRequest.getAmount())
                             .build();
                     return accountsClient.transfer(accountTransferRequest)
-                            .then(Mono.fromRunnable(() ->
-                                    kafkaTemplate.send("notifications",
-                                            internalTransferRequest.getUsername(), NotificationDto.builder()
-                                                    .username(internalTransferRequest.getUsername())
-                                                    .data(String.format("Перевод со счёта %s на счёт %s на сумму %s успешно совершен!",
-                                                            internalTransferRequest.getFromAccount(),
-                                                            internalTransferRequest.getToAccount(),
-                                                            internalTransferRequest.getAmount()))
-                                                    .build()))).then();
+                            .then(Mono.fromRunnable(() -> {
+                                        kafkaTemplate.send("notifications",
+                                                internalTransferRequest.getUsername(), NotificationDto.builder()
+                                                        .username(internalTransferRequest.getUsername())
+                                                        .data(String.format("Перевод со счёта %s на счёт %s на сумму %s успешно совершен!",
+                                                                internalTransferRequest.getFromAccount(),
+                                                                internalTransferRequest.getToAccount(),
+                                                                internalTransferRequest.getAmount()))
+                                                        .build());
+                                        log.info("Внутренний перевод успешен: username: {}, accountFrom: {}, accountTo: {}",
+                                                internalTransferRequest.getUsername(),
+                                                internalTransferRequest.getFromAccount(),
+                                                internalTransferRequest.getToAccount());
+                                    }
+                            )).then();
                 })
                 .onErrorResume(error -> {
                     meterRegistry.counter("transfer_block",
@@ -59,6 +67,10 @@ public class TransferServiceImpl implements TransferService {
                             "accountFrom", internalTransferRequest.getFromAccount(),
                             "userTo", internalTransferRequest.getUsername(),
                             "accountTo", internalTransferRequest.getToAccount()).increment();
+                    log.error("Внутренний перевод заблокирован: username: {}, accountFrom: {}, accountTo: {}",
+                            internalTransferRequest.getUsername(),
+                            internalTransferRequest.getFromAccount(),
+                            internalTransferRequest.getToAccount());
                     return Mono.fromRunnable(() ->
                             kafkaTemplate.send("notifications",
                                     internalTransferRequest.getUsername(), NotificationDto.builder()
@@ -90,16 +102,23 @@ public class TransferServiceImpl implements TransferService {
                             .withdrawAmount(externalTransferRequest.getAmount())
                             .build();
                     return accountsClient.transfer(accountTransferRequest)
-                            .then(Mono.fromRunnable(() ->
-                                    kafkaTemplate.send("notifications",
-                                            externalTransferRequest.getUsername(), NotificationDto.builder()
-                                                    .username(externalTransferRequest.getUsername())
-                                                    .data(String.format("Перевод со счёта %s на счёт %s (Пользователь: %s) на сумму %s успешно совершен!",
-                                                            externalTransferRequest.getFromAccount(),
-                                                            externalTransferRequest.getToAccount(),
-                                                            externalTransferRequest.getToUser(),
-                                                            externalTransferRequest.getAmount()))
-                                                    .build()))).then();
+                            .then(Mono.fromRunnable(() -> {
+                                        kafkaTemplate.send("notifications",
+                                                externalTransferRequest.getUsername(), NotificationDto.builder()
+                                                        .username(externalTransferRequest.getUsername())
+                                                        .data(String.format("Перевод со счёта %s на счёт %s (Пользователь: %s) на сумму %s успешно совершен!",
+                                                                externalTransferRequest.getFromAccount(),
+                                                                externalTransferRequest.getToAccount(),
+                                                                externalTransferRequest.getToUser(),
+                                                                externalTransferRequest.getAmount()))
+                                                        .build());
+                                        log.info("Внешний перевод успешен: usernameFrom: {}, usernameTo: {} accountFrom: {}, accountTo: {}",
+                                                externalTransferRequest.getUsername(),
+                                                externalTransferRequest.getToUser(),
+                                                externalTransferRequest.getFromAccount(),
+                                                externalTransferRequest.getToAccount());
+                                    }
+                                    )).then();
                 })
                 .onErrorResume(error -> {
                     meterRegistry.counter("transfer_block",
@@ -107,6 +126,11 @@ public class TransferServiceImpl implements TransferService {
                             "accountFrom", externalTransferRequest.getFromAccount(),
                             "userTo", externalTransferRequest.getToUser(),
                             "accountTo", externalTransferRequest.getToAccount()).increment();
+                    log.error("Внешний перевод заблокирован: usernameFrom: {}, usernameTo: {} accountFrom: {}, accountTo: {}",
+                            externalTransferRequest.getUsername(),
+                            externalTransferRequest.getToUser(),
+                            externalTransferRequest.getFromAccount(),
+                            externalTransferRequest.getToAccount());
                     return Mono.fromRunnable(() ->
                             kafkaTemplate.send("notifications",
                                     externalTransferRequest.getUsername(), NotificationDto.builder()
