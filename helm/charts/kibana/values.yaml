@@ -1,3 +1,9 @@
 kibana:
   fullnameOverride: kibana
   elasticsearchHosts: "http://elasticsearch:9200"
+  healthCheckPath: "/kibana/status"
+  kibanaConfig:
+    kibana.yml: |
+      server:
+        basePath: /kibana
+        rewriteBasePath: true

@@ -61,7 +61,7 @@ pipeline {
         stage('Delete Test helm deploy') {
             steps {
                 script {
-                    def services = ['kafka', 'prometheus', 'zipkin', 'grafana'] + [
+                    def services = ['kafka', 'prometheus', 'zipkin', 'grafana', 'elasticsearch', 'kibana', 'logstash'] + [
                         'accounts-service', 'api-gateway', 'blocker-service', 'cash-service',
                         'exchange-generator-service', 'exchange-service', 'frontend-service',
                         'notification-service', 'transfer-service'

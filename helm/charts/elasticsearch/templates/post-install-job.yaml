@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-index-template
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    spec:
+      containers:
+        - name: create-index-template
+          image: curlimages/curl:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # Ждём, пока Elasticsearch станет доступен
+              until curl -s http://elasticsearch:9200; do
+                echo "Waiting for Elasticsearch to start..."
+                sleep 60
+              done
+
+              # Создаём шаблон индекса
+              curl -X PUT "http://elasticsearch:9200/_index_template/logs-template" \
+                -H 'Content-Type: application/json' \
+                -d '
+              {
+                "index_patterns": ["logs-*"],
+                "template": {
+                  "settings": {
+                    "number_of_shards": 1,
+                    "number_of_replicas": 1,
+                    "index.lifecycle.name": "logs-policy"
+                  },
+                  "mappings": {
+                    "properties": {
+                      "@timestamp":   { "type": "date" },
+                      "log_time":     { "type": "text" },
+                      "service":      { "type": "keyword" },
+                      "level":        { "type": "keyword" },
+                      "msg_body":     { "type": "text" }
+                    }
+                  }
+                },
+                "priority": 1
+              }'
+      restartPolicy: OnFailure

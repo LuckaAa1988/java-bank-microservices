@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: high-blocks-alert
+spec:
+  groups:
+    - name: blocks.rules
+      rules:
+        - alert: HighBlockRate
+          expr: sum(rate(blocked_total[1m])) > 5
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Увеличилось количество блокировок"
+            description: "Количество блоикировок больше 5 за минуту!"

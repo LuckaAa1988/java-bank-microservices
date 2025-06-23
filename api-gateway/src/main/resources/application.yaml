@@ -86,12 +86,6 @@ spring:
           uri: http://notification-service:8088
           predicates:
             - Path=/api/notifications/**
-logging:
-  level:
-    org.springframework.security: DEBUG
-    org.springframework.security.oauth2: DEBUG
-    org.springframework.web: DEBUG
-    org.springframework.boot.autoconfigure.security: DEBUG
 management:
   zipkin:
     tracing:

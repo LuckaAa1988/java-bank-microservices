@@ -1,6 +1,6 @@
 prometheus:
-  fullnameOverride: prometheus
   server:
+    fullnameOverride: prometheus-server
     global:
       scrape_interval: 30s
       evaluation_interval: 30s

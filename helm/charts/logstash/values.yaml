@@ -12,17 +12,19 @@ logstash:
       }
       filter {
         grok {
-          match => { 
-                  "message" => "%{TIME:log_time} \[%{DATA:service}\] %{LOGLEVEL:level}: %{GREEDYDATA:msg_body}"
+          match => {
+            "message" => "%{TIME:log_time} \[%{DATA:service}\] %{LOGLEVEL:level} ?: %{GREEDYDATA:msg_body}"
+            }
           }
+        grok {
+          match => {
+            "msg_body" => "username: %{WORD:username}"
+          }
+          tag_on_failure => []
         }
-         grok {
-           match => {
-            "msg_body" => [
-              "%{DATA:event_type}: username(?:From)?: %{WORD:usernameFrom}?,? usernameTo: %{WORD:usernameTo}?,? accountFrom: %{WORD:accountFrom}?,? accountTo: %{WORD:accountTo}?,? account: %{WORD:account}?"
-            ]
-          }
-         tag_on_failure => []
+      date {
+        match => ["log_time", "HH:mm:ss.SSS"]
+          target => "@timestamp"
         }
       }
       output {
