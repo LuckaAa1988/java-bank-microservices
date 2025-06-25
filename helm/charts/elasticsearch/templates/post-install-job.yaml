@@ -38,6 +38,8 @@ spec:
                       "@timestamp":   { "type": "date" },
                       "log_time":     { "type": "text" },
                       "service":      { "type": "keyword" },
+                      "traceId":      { "type": "keyword" },
+                      "parentId":       { "type": "keyword" },
                       "level":        { "type": "keyword" },
                       "msg_body":     { "type": "text" }
                     }

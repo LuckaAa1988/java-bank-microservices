@@ -66,7 +66,7 @@ public class CashServiceImpl implements CashService {
                             log.info("Успешное снятие: username: {}, account: {}",
                                     accountDto.getUsername(), accountDto.getCurrency());
                         }
-                        ))
+                ))
                 .onErrorResume(error -> {
                     meterRegistry.counter("cash_block", "user", accountDto.getUsername(),
                             "account", accountDto.getCurrency()).increment();

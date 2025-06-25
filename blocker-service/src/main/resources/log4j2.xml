@@ -8,7 +8,7 @@
             <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level: %msg%n"/>
         </Console>
         <Kafka name="Kafka" topic="bank-logs">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [${SERVICE_NAME}] %-5level: %msg%n"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [${SERVICE_NAME}] [%X{traceId:-},%X{spanId:-}] %-5level: %msg%n"/>
             <Property name="bootstrap.servers">kafka:9092</Property>
         </Kafka>
     </Appenders>

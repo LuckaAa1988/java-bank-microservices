@@ -18,14 +18,27 @@ logstash:
           }
         grok {
           match => {
-            "msg_body" => "username: %{WORD:username}"
+            "msg_body" => [
+              "username: %{WORD:username}"
+            ]
           }
           tag_on_failure => []
         }
-      date {
-        match => ["log_time", "HH:mm:ss.SSS"]
-          target => "@timestamp"
+        json {
+          source => "msg_body"
+          target => "zipkin"  
+          tag_on_failure => []
         }
+        mutate {
+          add_field => {
+            "traceId" => "%{[zipkin][traceId]}"
+            "spanId"  => "%{[zipkin][id]}"
+          }
+        }
+        date {
+          match => ["log_time", "yyyy-MM-dd HH:mm:ss.SSS"]
+            target => "@timestamp"
+          }
       }
       output {
         elasticsearch {
